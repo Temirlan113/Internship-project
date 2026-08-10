@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2" author="student">
+        <createTable tableName="chapters">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="chapter_order" type="integer">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="course_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_chapters_course"
+                             referencedTableName="courses"
+                             referencedColumnNames="id"/>
+            </column>
+
+            <column name="created_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+    </changeSet>
+
+    <changeSet id="002-insert-initial-chapters" author="student">
+        <insert tableName="chapters">
+            <column name="name" value="Java Core"/>
+            <column name="description" value="Базовая учебная программа, направленная на изучение синтаксиса,
+            фундаментальных концепций языка Java и возможностей платформы Java SE (Standard Edition)."/>
+            <column name="chapter_order" valueNumeric="1"/>
+            <column name="course_id" valueNumeric="1"/>
+            <column name="created_time" valueDate="2026-08-10T10:00:00"/>
+            <column name="updated_time" valueDate="2026-08-10T10:00:00"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="3" author="student">
+        <createTable tableName="lessons">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="lesson_order" type="integer">
+                <constraints nullable="false"/>
+            </column>
+
+
+            <column name="chapter_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_lessons_chapter"
+                             referencedTableName="chapters"
+                             referencedColumnNames="id"/>
+            </column>
+
+            <column name="created_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+    </changeSet>
+
+    <changeSet id="003-insert-initial-lessons" author="student">
+        <insert tableName="lessons">
+            <column name="name" value="Переменные и строки"/>
+            <column name="description" value="Переменная в Java — это именная ячейка памяти для хранения данных,
+            а строка (String) — это ссылочный тип для работы с текстом."/>
+            <column name="content" value = "Переменные в JavaПримитивные типы: хранят простые значения
+             (числа, булевы значения, символы).Объявление: пишется тип данных, затем имя переменной.
+             Инициализация: присваивание значения через знак равно =. Строки (String) в JavaСсылки на объекты:
+             строка не является примитивом, это полноценный класс.Двойные кавычки: текст всегда заключается в кавычки
+              .Сложение (конкатенация): строки легко соединять между собой с помощью плюса"/>
+            <column name="lesson_order" valueNumeric="1"/>
+            <column name="chapter_id" valueNumeric="1"/>
+            <column name="created_time" valueDate="2026-08-10T10:00:00"/>
+            <column name="updated_time" valueDate="2026-08-10T10:00:00"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

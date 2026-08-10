@@ -5,6 +5,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
+    <include file="db/changelog/changeset/001-create-table-course.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changeset/002-create-table-chapter.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changeset/003-create-table-lesson.xml" relativeToChangelogFile="false"/>
 
 
 </databaseChangeLog>

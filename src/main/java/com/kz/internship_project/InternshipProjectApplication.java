@@ -1,4 +1,4 @@
-package com.bitlab.internship_project;
+package com.kz.internship_project;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="student"> <createTable tableName="courses">
+        <column name="id" type="bigint" autoIncrement="true">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+        <column name="name" type="varchar(255)">
+            <constraints nullable="false"/>
+        </column>
+        <column name="description" type="varchar(2550)">
+            <constraints nullable="false"/>
+        </column>
+        <column name="created_time" type="timestamp">
+            <constraints nullable="false"/>
+        </column>
+        <column name="updated_time" type="timestamp">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+
+
+    </changeSet>
+    
+    <changeSet id="001-insert-initial-courses" author="student">
+        <insert tableName="courses">
+            <column name="name" value="Java Backend Developer"/>
+            <column name="description" value="комплексная программа обучения, которая готовит специалистов по созданию
+            внутренней (серверной) части веб-приложений, сервисов и высоконагруженных систем. Java является стандартом
+            в корпоративной разработке (FinTech, ритейл, облачные платформы), поэтому курс ориентирован на освоение
+            надежной архитектуры, работу с базами данных и построение бизнес-логики."/>
+            <column name="created_time" valueDate="2026-08-10T10:00:00"/>
+            <column name="updated_time" valueDate="2026-08-10T10:00:00"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
