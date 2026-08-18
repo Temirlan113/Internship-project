@@ -2,8 +2,10 @@ package com.kz.internship_project.service;
 
 import com.kz.internship_project.dto.ChapterCreateDto;
 import com.kz.internship_project.dto.ChapterResponseDto;
+import com.kz.internship_project.dto.CourseResponseDto;
 import com.kz.internship_project.entity.Chapter;
 import com.kz.internship_project.repository.ChapterRepository;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -18,6 +20,8 @@ public interface ChapterService {
     void delete(Long id);
 
     List<ChapterResponseDto> getByCourseId(Long courseId);
+
+
 
 
 }

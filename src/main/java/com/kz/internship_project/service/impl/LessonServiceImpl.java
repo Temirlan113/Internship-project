@@ -1,8 +1,10 @@
 package com.kz.internship_project.service.impl;
 
+import com.kz.internship_project.dto.CourseResponseDto;
 import com.kz.internship_project.dto.LessonCreateDto;
 import com.kz.internship_project.dto.LessonResponseDto;
 import com.kz.internship_project.entity.Chapter;
+import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.entity.Lesson;
 import com.kz.internship_project.mapper.LessonMapper;
 import com.kz.internship_project.repository.ChapterRepository;
@@ -11,6 +13,10 @@ import com.kz.internship_project.service.LessonService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +41,8 @@ public class LessonServiceImpl implements LessonService {
 
         Chapter chapter = chapterRepository.findById(dto.chapterId()).orElseThrow(() -> new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена"));
         Lesson lesson = lessonMapper.toEntity(dto);
-        Integer order = lessonRepository.findMaxOrderByChapterId(dto.chapterId());
-        lesson.setLessonOrder((order == null ? 0 : order) + 1);
+        Integer maxOrder = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(dto.chapterId()).map(Lesson::getLessonOrder).orElse(0);
+        lesson.setLessonOrder(maxOrder + 1);
         lesson.setChapter(chapter);
         Lesson savedLesson = lessonRepository.save(lesson);
 
@@ -97,7 +103,7 @@ public class LessonServiceImpl implements LessonService {
 
         log.info("Получение списка уроков по id главы: {}", chapterId);
 
-        if (!chapterRepository.existsById(chapterId)) {
+        if (chapterRepository.existsById(chapterId)) {
             throw new EntityNotFoundException("Глава с id " + chapterId + " не найдена");
 
         }
@@ -105,4 +111,6 @@ public class LessonServiceImpl implements LessonService {
         return lessonRepository.findByChapterIdOrderByLessonOrderAsc(chapterId).stream().map(lessonMapper::toDto).toList();
 
     }
+
+
 }

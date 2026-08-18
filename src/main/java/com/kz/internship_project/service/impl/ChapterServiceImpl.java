@@ -2,15 +2,22 @@ package com.kz.internship_project.service.impl;
 
 import com.kz.internship_project.dto.ChapterCreateDto;
 import com.kz.internship_project.dto.ChapterResponseDto;
+import com.kz.internship_project.dto.LessonResponseDto;
 import com.kz.internship_project.entity.Chapter;
 import com.kz.internship_project.entity.Course;
+import com.kz.internship_project.entity.Lesson;
 import com.kz.internship_project.mapper.ChapterMapper;
 import com.kz.internship_project.repository.ChapterRepository;
 import com.kz.internship_project.repository.CourseRepository;
+import com.kz.internship_project.repository.LessonRepository;
 import com.kz.internship_project.service.ChapterService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +32,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final CourseRepository courseRepository;
     private final ChapterRepository chapterRepository;
     private final ChapterMapper chapterMapper;
+    private final LessonRepository lessonRepository;
 
 
     @Override
@@ -35,8 +43,8 @@ public class ChapterServiceImpl implements ChapterService {
 
         Course course = courseRepository.findById(dto.courseId()).orElseThrow(() -> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
         Chapter chapter = chapterMapper.toEntity(dto);
-        Integer order = chapterRepository.findMaxOrderByCourseId(dto.courseId());
-        chapter.setChapterOrder((order == null ? 0 : order) + 1);
+        Integer maxOrder = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(dto.courseId()).map(Chapter::getChapterOrder).orElse(0);
+        chapter.setChapterOrder(maxOrder + 1);
         chapter.setCourse(course);
         Chapter savedChapter = chapterRepository.save(chapter);
 
@@ -62,7 +70,7 @@ public class ChapterServiceImpl implements ChapterService {
         log.info("Обновление главы по id: {}", id);
         log.debug("Обновление главы с данными: {}", dto);
 
-        Course course = courseRepository.findById(dto.courseId()).orElseThrow(()-> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
+        Course course = courseRepository.findById(dto.courseId()).orElseThrow(() -> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
         Chapter existingChapter = chapterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Глава с id " + id + " не найдена"));
         existingChapter.setName(dto.name());
         existingChapter.setDescription(dto.description());
@@ -85,6 +93,11 @@ public class ChapterServiceImpl implements ChapterService {
         if (!chapterRepository.existsById(id)) {
             throw new EntityNotFoundException("Глава с id " + id + " не найдена");
         }
+
+        if (lessonRepository.existsById(id)){
+            throw new IllegalArgumentException("Главу нельзя удалить, пока в ней есть уроки!");
+        }
+
         chapterRepository.deleteById(id);
     }
 
@@ -99,4 +112,5 @@ public class ChapterServiceImpl implements ChapterService {
         return chapterRepository.findByCourseIdOrderByChapterOrderAsc(courseId).stream().map(chapterMapper::toDto).toList();
 
     }
+
 }

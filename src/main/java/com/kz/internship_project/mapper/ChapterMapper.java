@@ -12,8 +12,7 @@ public interface ChapterMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "chapterOrder", ignore = true)
     @Mapping(target = "course", ignore = true)
-    @Mapping(target = "createdTime", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "updatedTime", expression = "java(java.time.LocalDateTime.now())")
+
     Chapter toEntity(ChapterCreateDto dto);
 
     @Mapping(source = "course.id", target = "courseId")
