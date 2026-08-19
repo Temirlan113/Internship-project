@@ -12,4 +12,5 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
     List<Chapter> findByCourseIdOrderByChapterOrderAsc(Long courseId);
 
     Optional<Chapter> findFirstByCourseIdOrderByChapterOrderDesc(Long courseId);
+
 }

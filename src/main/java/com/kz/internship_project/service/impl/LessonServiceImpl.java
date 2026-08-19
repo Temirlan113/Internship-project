@@ -1,10 +1,8 @@
 package com.kz.internship_project.service.impl;
 
-import com.kz.internship_project.dto.CourseResponseDto;
 import com.kz.internship_project.dto.LessonCreateDto;
 import com.kz.internship_project.dto.LessonResponseDto;
 import com.kz.internship_project.entity.Chapter;
-import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.entity.Lesson;
 import com.kz.internship_project.mapper.LessonMapper;
 import com.kz.internship_project.repository.ChapterRepository;
@@ -13,10 +11,6 @@ import com.kz.internship_project.service.LessonService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
