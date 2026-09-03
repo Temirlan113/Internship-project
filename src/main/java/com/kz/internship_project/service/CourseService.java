@@ -1,10 +1,8 @@
 package com.kz.internship_project.service;
 
-import com.kz.internship_project.dto.CourseCreateDto;
-import com.kz.internship_project.dto.CourseResponseDto;
+import com.kz.internship_project.dto.course.CourseCreateDto;
+import com.kz.internship_project.dto.course.CourseResponseDto;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public interface CourseService {
 

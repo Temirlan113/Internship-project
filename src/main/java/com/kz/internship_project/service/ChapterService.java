@@ -1,11 +1,7 @@
 package com.kz.internship_project.service;
 
-import com.kz.internship_project.dto.ChapterCreateDto;
-import com.kz.internship_project.dto.ChapterResponseDto;
-import com.kz.internship_project.dto.CourseResponseDto;
-import com.kz.internship_project.entity.Chapter;
-import com.kz.internship_project.repository.ChapterRepository;
-import org.springframework.data.domain.Page;
+import com.kz.internship_project.dto.chapter.ChapterCreateDto;
+import com.kz.internship_project.dto.chapter.ChapterResponseDto;
 
 import java.util.List;
 

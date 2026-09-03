@@ -13,4 +13,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     List<Lesson> findByChapterIdOrderByLessonOrderAsc(Long chapterId);
 
     Optional<Lesson> findFirstByChapterIdOrderByLessonOrderDesc(Long chapterId);
+
+    boolean existsByChapterId(Long chapterId);
+
 }

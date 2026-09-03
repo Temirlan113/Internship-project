@@ -1,4 +1,4 @@
-package com.kz.internship_project.config.swagger;
+package com.kz.internship_project.config;
 
 import com.kz.internship_project.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +19,9 @@ import java.lang.annotation.Target;
         @ApiResponse(responseCode = "404", description = "Ресурс не найден",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Ошибка аутентификации",
+        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 })
 public @interface ApiCommonResponses {
 }

@@ -1,4 +1,4 @@
-package com.kz.internship_project.dto;
+package com.kz.internship_project.dto.course;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;

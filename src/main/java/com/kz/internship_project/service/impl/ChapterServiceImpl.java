@@ -1,7 +1,7 @@
 package com.kz.internship_project.service.impl;
 
-import com.kz.internship_project.dto.ChapterCreateDto;
-import com.kz.internship_project.dto.ChapterResponseDto;
+import com.kz.internship_project.dto.chapter.ChapterCreateDto;
+import com.kz.internship_project.dto.chapter.ChapterResponseDto;
 import com.kz.internship_project.entity.Chapter;
 import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.mapper.ChapterMapper;
@@ -28,6 +28,14 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterMapper chapterMapper;
     private final LessonRepository lessonRepository;
 
+    private Course getCourseOrThrow(Long courseId){
+        return courseRepository.findById(courseId).orElseThrow(()->new EntityNotFoundException("Курс с id " + courseId + " не найден"));
+    }
+
+    private Chapter getChapterOrThrow(Long id){
+        return chapterRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Глава с id " + id + " не найдена"));
+    }
+
 
     @Override
     @Transactional
@@ -35,7 +43,7 @@ public class ChapterServiceImpl implements ChapterService {
         log.info("Создание новой главы");
         log.debug("Создание главы с данными: {}", dto);
 
-        Course course = courseRepository.findById(dto.courseId()).orElseThrow(() -> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
+        Course course = getCourseOrThrow(dto.courseId());
         Chapter chapter = chapterMapper.toEntity(dto);
         Integer maxOrder = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(dto.courseId()).map(Chapter::getChapterOrder).orElse(0);
         chapter.setChapterOrder(maxOrder + 1);
@@ -53,7 +61,7 @@ public class ChapterServiceImpl implements ChapterService {
 
         log.info("Получение главы по id: {}", id);
 
-        Chapter chapter = chapterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Глава с id " + id + " не найдена"));
+        Chapter chapter = getChapterOrThrow(id);
         return chapterMapper.toDto(chapter);
     }
 
@@ -64,8 +72,8 @@ public class ChapterServiceImpl implements ChapterService {
         log.info("Обновление главы по id: {}", id);
         log.debug("Обновление главы с данными: {}", dto);
 
-        Course course = courseRepository.findById(dto.courseId()).orElseThrow(() -> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
-        Chapter existingChapter = chapterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Глава с id " + id + " не найдена"));
+        Course course = getCourseOrThrow(dto.courseId());
+        Chapter existingChapter = getChapterOrThrow(id);
         existingChapter.setName(dto.name());
         existingChapter.setDescription(dto.description());
         existingChapter.setCourse(course);
@@ -88,7 +96,7 @@ public class ChapterServiceImpl implements ChapterService {
             throw new EntityNotFoundException("Глава с id " + id + " не найдена");
         }
 
-        if (lessonRepository.existsById(id)){
+        if (lessonRepository.existsByChapterId(id)){
             throw new IllegalArgumentException("Главу нельзя удалить, пока в ней есть уроки!");
         }
 

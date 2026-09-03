@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   postgres:
@@ -15,9 +15,72 @@ services:
     build: .
     container_name: main-service-app
     ports:
-      - "8083:8083"
+      - "8083:8085"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/internship-project-db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: satorugod1
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+       postgres:
+          condition: service_started
+       keycloak:
+         condition: service_healthy
 
+
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.2
+    container_name: keycloak-app
+    environment:
+      - KC_DB=postgres
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak
+
+
+    command: ["start-dev", "--import-realm"]
+
+    volumes:
+      - ./user-service.json:/opt/keycloak/data/import/user-service.json:ro
+
+    ports:
+      - "8084:8080"
+
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /realms/master HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: keycloak-db-container
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
+    ports:
+      - "5444:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+#      - ./insert.sql:/docker-entrypoint-initdb.d/insert.sql
+
+    healthcheck:
+          test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+
+volumes:
+  postgres_data:

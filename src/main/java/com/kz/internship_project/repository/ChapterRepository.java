@@ -13,4 +13,6 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     Optional<Chapter> findFirstByCourseIdOrderByChapterOrderDesc(Long courseId);
 
+    boolean existsByCourseId(Long courseId);
+
 }

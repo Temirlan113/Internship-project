@@ -1,17 +1,16 @@
 package com.kz.internship_project.controller;
 
-import com.kz.internship_project.config.swagger.ApiCommonResponses;
-import com.kz.internship_project.dto.ChapterCreateDto;
-import com.kz.internship_project.dto.ChapterResponseDto;
-import com.kz.internship_project.dto.CourseResponseDto;
+import com.kz.internship_project.config.ApiCommonResponses;
+import com.kz.internship_project.dto.chapter.ChapterCreateDto;
+import com.kz.internship_project.dto.chapter.ChapterResponseDto;
 import com.kz.internship_project.service.ChapterService;
+import com.kz.internship_project.service.impl.ChapterServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

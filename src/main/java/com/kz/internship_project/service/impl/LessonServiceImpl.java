@@ -1,7 +1,7 @@
 package com.kz.internship_project.service.impl;
 
-import com.kz.internship_project.dto.LessonCreateDto;
-import com.kz.internship_project.dto.LessonResponseDto;
+import com.kz.internship_project.dto.lesson.LessonCreateDto;
+import com.kz.internship_project.dto.lesson.LessonResponseDto;
 import com.kz.internship_project.entity.Chapter;
 import com.kz.internship_project.entity.Lesson;
 import com.kz.internship_project.mapper.LessonMapper;
@@ -26,6 +26,14 @@ public class LessonServiceImpl implements LessonService {
     private final ChapterRepository chapterRepository;
     private final LessonMapper lessonMapper;
 
+    private Chapter getChapterOrThrow(Long chapterId){
+        return chapterRepository.findById(chapterId).orElseThrow(()->new EntityNotFoundException("Глава с id " + chapterId + " не найдена"));
+    }
+
+    private Lesson getLessonOrThrow(Long id){
+        return lessonRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Урок с id " + id + " не найден"));
+    }
+
     @Override
     @Transactional
     public LessonResponseDto create(LessonCreateDto dto) {
@@ -33,7 +41,7 @@ public class LessonServiceImpl implements LessonService {
         log.info("Создание нового урока");
         log.debug("Создание урока с данными: {}", dto);
 
-        Chapter chapter = chapterRepository.findById(dto.chapterId()).orElseThrow(() -> new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена"));
+        Chapter chapter = getChapterOrThrow(dto.chapterId());
         Lesson lesson = lessonMapper.toEntity(dto);
         Integer maxOrder = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(dto.chapterId()).map(Lesson::getLessonOrder).orElse(0);
         lesson.setLessonOrder(maxOrder + 1);
@@ -53,7 +61,7 @@ public class LessonServiceImpl implements LessonService {
 
         log.info("Получение урока по id: {}", id);
 
-        Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Урок с id " + id + " не найден"));
+        Lesson lesson = getLessonOrThrow(id);
 
         return lessonMapper.toDto(lesson);
     }
@@ -66,8 +74,8 @@ public class LessonServiceImpl implements LessonService {
         log.debug("Обновление урока с данными: {}", dto);
 
 
-        Chapter chapter = chapterRepository.findById(dto.chapterId()).orElseThrow(() -> new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена"));
-        Lesson existingLesson = lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Урок с id " + id + " не найден"));
+        Chapter chapter = getChapterOrThrow(dto.chapterId());
+        Lesson existingLesson = getLessonOrThrow(id);
         existingLesson.setName(dto.name());
         existingLesson.setDescription(dto.description());
         existingLesson.setContent(dto.content());
@@ -97,7 +105,7 @@ public class LessonServiceImpl implements LessonService {
 
         log.info("Получение списка уроков по id главы: {}", chapterId);
 
-        if (chapterRepository.existsById(chapterId)) {
+        if (!chapterRepository.existsById(chapterId)) {
             throw new EntityNotFoundException("Глава с id " + chapterId + " не найдена");
 
         }

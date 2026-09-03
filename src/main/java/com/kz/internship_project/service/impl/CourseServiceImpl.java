@@ -1,7 +1,7 @@
 package com.kz.internship_project.service.impl;
 
-import com.kz.internship_project.dto.CourseCreateDto;
-import com.kz.internship_project.dto.CourseResponseDto;
+import com.kz.internship_project.dto.course.CourseCreateDto;
+import com.kz.internship_project.dto.course.CourseResponseDto;
 import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.mapper.CourseMapper;
 import com.kz.internship_project.repository.ChapterRepository;
@@ -14,11 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Slf4j
 @Service
@@ -29,6 +27,10 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final ChapterRepository chapterRepository;
+
+    private Course getCourseOrThrow(Long id) {
+        return courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Курс с id " + id + " не найден"));
+    }
 
     @Override
     @Transactional
@@ -49,7 +51,7 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponseDto getById(Long id) {
         log.info("Получение курса по id: {}", id);
 
-        Course course = courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Курс с id " + id + " не найден"));
+        Course course = getCourseOrThrow(id);
         return courseMapper.toDto(course);
     }
 
@@ -59,7 +61,7 @@ public class CourseServiceImpl implements CourseService {
         log.info("Обновление курса по id: {}", id);
         log.debug("Обновление курса с данными: {}", dto);
 
-        Course existingCourse = courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Курс с id " + id + " не найден"));
+        Course existingCourse = getCourseOrThrow(id);
         existingCourse.setName(dto.name());
         existingCourse.setDescription(dto.description());
         Course updatedCourse = courseRepository.save(existingCourse);
@@ -79,21 +81,21 @@ public class CourseServiceImpl implements CourseService {
             throw new EntityNotFoundException("Курс с id " + id + " не найден");
         }
 
-        if (chapterRepository.existsById(id)){
+        if (chapterRepository.existsByCourseId(id)) {
             throw new IllegalArgumentException("Курс нельзя удалить, пока в нем есть главы!");
         }
         courseRepository.deleteById(id);
     }
 
     @Override
-    public Page<CourseResponseDto> getAll(int page, int size, String sortBy, String sortDir){
+    public Page<CourseResponseDto> getAll(int page, int size, String sortBy, String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.DESC.name())
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Course> courses =courseRepository.findAll(pageable);
+        Page<Course> courses = courseRepository.findAll(pageable);
 
         return courses.map(courseMapper::toDto);
     }

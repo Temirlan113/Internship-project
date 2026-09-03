@@ -2,11 +2,16 @@ package com.kz.internship_project.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+
 
 import java.time.LocalDateTime;
 
@@ -14,19 +19,22 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message
+        );
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
     @ExceptionHandler({EntityNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex){
 
         log.warn("Ресурс не найден: {}", ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
-                ex.getMessage()
-        );
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -34,13 +42,7 @@ public class GlobalExceptionHandler {
 
         log.error("Внутренняя ошибка сервера: ", ex);
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "Произошла ошибка на сервере. Обратитесь к администратору"
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,26 +52,32 @@ public class GlobalExceptionHandler {
 
         log.warn("Ошибка валидации входящих данных: {}", errorMessage);
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                errorMessage
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex){
+    @ExceptionHandler({IllegalArgumentException.class, PropertyReferenceException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequestException(Exception ex){
 
         log.warn("Некорректный аргумент: {}", ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+
+
+    @ExceptionHandler({HttpClientErrorException.Unauthorized.class, BadCredentialsException.class})
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(Exception ex){
+        log.warn("Ошибка аутентификации: {}", ex.getMessage());
+
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler({HttpClientErrorException.Forbidden.class, AccessDeniedException.class, SecurityException.class})
+    public ResponseEntity<ErrorResponse> handleForbiddenException(HttpClientErrorException.Forbidden ex){
+        log.warn("У вас нет прав доступа: {}", ex.getMessage());
+
+        return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
 }

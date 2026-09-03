@@ -1,7 +1,7 @@
 package com.kz.internship_project.mapper;
 
-import com.kz.internship_project.dto.CourseCreateDto;
-import com.kz.internship_project.dto.CourseResponseDto;
+import com.kz.internship_project.dto.course.CourseCreateDto;
+import com.kz.internship_project.dto.course.CourseResponseDto;
 import com.kz.internship_project.entity.Course;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

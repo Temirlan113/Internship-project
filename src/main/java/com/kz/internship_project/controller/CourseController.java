@@ -1,8 +1,8 @@
 package com.kz.internship_project.controller;
 
-import com.kz.internship_project.config.swagger.ApiCommonResponses;
-import com.kz.internship_project.dto.CourseCreateDto;
-import com.kz.internship_project.dto.CourseResponseDto;
+import com.kz.internship_project.config.ApiCommonResponses;
+import com.kz.internship_project.dto.course.CourseCreateDto;
+import com.kz.internship_project.dto.course.CourseResponseDto;
 import com.kz.internship_project.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,8 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
