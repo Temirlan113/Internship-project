@@ -39,6 +39,9 @@ docker compose up --build -d
 > 🔐 **Админка Keycloak**: http://localhost:8084
 > **Логин**: `admin` | **Пароль**: `admin`
 
+
+> 🔐 **Админ созданный через KeycloakInitializer**: http://localhost:8084
+> **Логин**: `appAdmin` | **Пароль**: `password123`
 ---
 
 ## 🔑 Тестовые аккаунты
