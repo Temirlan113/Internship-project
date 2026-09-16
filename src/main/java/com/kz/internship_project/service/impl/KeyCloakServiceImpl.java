@@ -5,6 +5,7 @@ import com.kz.internship_project.dto.auth.JwtResponseDto;
 import com.kz.internship_project.dto.auth.LoginCreateDto;
 import com.kz.internship_project.dto.auth.RefreshTokenRequestDto;
 import com.kz.internship_project.dto.user.UserCreateDto;
+import com.kz.internship_project.dto.user.UserResponseDto;
 import com.kz.internship_project.dto.user.UserUpdateDto;
 import com.kz.internship_project.enums.RoleUser;
 import com.kz.internship_project.mapper.AuthMapper;
@@ -65,7 +66,7 @@ public class KeyCloakServiceImpl implements KeycloakService {
 
 
     @Override
-    public UserRepresentation createUser(UserCreateDto user) {
+    public UserResponseDto createUser(UserCreateDto user) {
 
         RealmResource realmResource = keycloakAdmin.realm(realm);
         UsersResource usersResource = realmResource.users();
@@ -168,7 +169,7 @@ public class KeyCloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public void updateUser(String userId, UserUpdateDto dto, boolean isCallerAdmin) {
+    public void updateUser(String userId, UserUpdateDto dto) {
 
         RealmResource realmResource = keycloakAdmin.realm(realm);
         UserResource userResource = realmResource.users().get(userId);

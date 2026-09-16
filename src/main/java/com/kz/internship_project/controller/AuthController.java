@@ -4,7 +4,7 @@ import com.kz.internship_project.dto.auth.AuthResponseDto;
 import com.kz.internship_project.dto.auth.JwtResponseDto;
 import com.kz.internship_project.dto.auth.LoginCreateDto;
 import com.kz.internship_project.dto.auth.RefreshTokenRequestDto;
-import com.kz.internship_project.service.impl.KeyCloakServiceImpl;
+import com.kz.internship_project.service.KeycloakService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final KeyCloakServiceImpl keyCloakService;
+    private final KeycloakService keyCloakService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponseDto> login(@RequestBody LoginCreateDto login){

@@ -38,22 +38,26 @@ public class LessonServiceImpl implements LessonService {
     @Transactional
     public LessonResponseDto create(LessonCreateDto dto) {
 
+        if (!chapterRepository.existsById(dto.chapterId())) {
+            throw new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена");
+        }
+
         log.info("Создание нового урока");
         log.debug("Создание урока с данными: {}", dto);
 
-        Chapter chapter = getChapterOrThrow(dto.chapterId());
-        Lesson lesson = lessonMapper.toEntity(dto);
-        Integer maxOrder = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(dto.chapterId()).map(Lesson::getLessonOrder).orElse(0);
-        lesson.setLessonOrder(maxOrder + 1);
-        lesson.setChapter(chapter);
-        Lesson savedLesson = lessonRepository.save(lesson);
+        lessonRepository.insertNextLesson(
+                dto.name(),
+                dto.description(),
+                dto.content(),
+                dto.chapterId()
+        );
+        Lesson savedLesson = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(dto.chapterId())
+                .orElseThrow(()->new EntityNotFoundException("Ошибка при получении созданного урока"));
 
         LessonResponseDto responseDto = lessonMapper.toDto(savedLesson);
 
         log.debug("Урок успешно сохранен: {}", responseDto);
         return responseDto;
-
-
     }
 
     @Override

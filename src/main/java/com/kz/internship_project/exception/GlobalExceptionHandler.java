@@ -13,13 +13,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message){
+    private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message) {
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 status.value(),
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({EntityNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex){
+    public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex) {
 
         log.warn("Ресурс не найден: {}", ex.getMessage());
 
@@ -38,7 +39,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex){
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
 
         log.error("Внутренняя ошибка сервера: ", ex);
 
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex){
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
 
         String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
 
@@ -57,7 +58,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({IllegalArgumentException.class, PropertyReferenceException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequestException(Exception ex){
+    public ResponseEntity<ErrorResponse> handleBadRequestException(Exception ex) {
 
         log.warn("Некорректный аргумент: {}", ex.getMessage());
 
@@ -65,19 +66,36 @@ public class GlobalExceptionHandler {
     }
 
 
-
     @ExceptionHandler({HttpClientErrorException.Unauthorized.class, BadCredentialsException.class})
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(Exception ex){
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(Exception ex) {
         log.warn("Ошибка аутентификации: {}", ex.getMessage());
 
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler({HttpClientErrorException.Forbidden.class, AccessDeniedException.class, SecurityException.class})
-    public ResponseEntity<ErrorResponse> handleForbiddenException(HttpClientErrorException.Forbidden ex){
+    public ResponseEntity<ErrorResponse> handleForbiddenException(HttpClientErrorException.Forbidden ex) {
         log.warn("У вас нет прав доступа: {}", ex.getMessage());
 
         return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    @ExceptionHandler(CustomFileNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFileNotFound(CustomFileNotFoundException ex) {
+        log.warn("Файл не найден: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(CustomFileStorageException.class)
+    public ResponseEntity<ErrorResponse> FileStorageException(CustomFileStorageException ex){
+        log.warn("Ошибка файлового хранилища: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> AccessDeniedException(AccessDeniedException ex){
+        log.warn("У вас нет прав для этого действия, {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+
+    }
 }

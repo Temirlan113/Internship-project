@@ -21,10 +21,13 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: satorugod1
       KEYCLOAK_URL: http://keycloak:8080
+      MINIO_URL: http://minio-service:9000
     depends_on:
        postgres:
           condition: service_started
        keycloak:
+         condition: service_healthy
+       minio-service:
          condition: service_healthy
 
 
@@ -54,7 +57,7 @@ services:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /realms/master HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK' || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 15
       start_period: 30s
 
 
@@ -74,7 +77,6 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
-#      - ./insert.sql:/docker-entrypoint-initdb.d/insert.sql
 
     healthcheck:
           test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
@@ -82,5 +84,46 @@ services:
           timeout: 5s
           retries: 5
 
+  minio-service:
+    image: quay.io/minio/minio
+    container_name: 'minio_service_container'
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin1234
+    volumes:
+        - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-setup:
+    image: minio/mc
+    container_name: minio-setup-container
+    environment:
+      MC_HOST: http://admin:admin1234@minio-service:9000
+      depends_on:
+        minio-service
+      condition: service_healthy
+
+    entrypoint: >
+      /bin/sh -c "
+            echo 'Waiting for MinIO server to be fully ready...';
+            until mc alias set minio-service http://minio-service:9000 admin admin1234; do
+              echo 'MinIO is not ready yet, retrying in 2 seconds...';
+              sleep 2;
+            done;
+            echo 'Creating bucket...';
+            mc mb --ignore-existing minio-service/dev-bucket;
+            echo 'Bucket created successfully!';
+            exit 0;
+            "
+
 volumes:
   postgres_data:
+  minio_data:

@@ -5,6 +5,7 @@ import com.kz.internship_project.dto.auth.JwtResponseDto;
 import com.kz.internship_project.dto.auth.LoginCreateDto;
 import com.kz.internship_project.dto.auth.RefreshTokenRequestDto;
 import com.kz.internship_project.dto.user.UserCreateDto;
+import com.kz.internship_project.dto.user.UserResponseDto;
 import com.kz.internship_project.dto.user.UserUpdateDto;
 import com.kz.internship_project.enums.RoleUser;
 import com.kz.internship_project.mapper.AuthMapper;
@@ -81,6 +82,7 @@ class KeyCloakServiceImplTest {
     private final String clientSecret = "test-secret";
 
     private UserCreateDto userCreateDto;
+    private UserResponseDto userResponseDto;
     private UserRepresentation fakeUserRepresentation;
 
     @BeforeEach
@@ -103,10 +105,22 @@ class KeyCloakServiceImplTest {
                 RoleUser.ROLE_USER
         );
 
+        userResponseDto = new UserResponseDto(
+                "user-123",
+                "john_doe",
+                "john@example.com",
+                RoleUser.ROLE_USER,
+                true,
+                true);
+
         fakeUserRepresentation = new UserRepresentation();
         fakeUserRepresentation.setId("user-123");
         fakeUserRepresentation.setUsername("john_doe");
         fakeUserRepresentation.setEmail("john@example.com");
+        fakeUserRepresentation.setFirstName("John");
+        fakeUserRepresentation.setLastName("Doe");
+        fakeUserRepresentation.setEmailVerified(true);
+        fakeUserRepresentation.setEnabled(true);
     }
 
     private void mockKeycloakFluentChain() {
@@ -136,14 +150,14 @@ class KeyCloakServiceImplTest {
         Mockito.when(usersResource.create(Mockito.any(UserRepresentation.class))).thenReturn(responseMock);
         Mockito.when(roleResource.toRepresentation()).thenReturn(new RoleRepresentation("ROLE_USER", null, false));
         Mockito.when(userResource.toRepresentation()).thenReturn(fakeUserRepresentation);
-        Mockito.when(userMapper.toDto(Mockito.any(), Mockito.any())).thenReturn(fakeUserRepresentation);
+        Mockito.when(userMapper.toDto(Mockito.any(), Mockito.any())).thenReturn(userResponseDto);
 
         // Act
-        UserRepresentation result = keycloakService.createUser(userCreateDto);
+        UserResponseDto result = keycloakService.createUser(userCreateDto);
 
         // Assert
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("user-123", result.getId());
+        Assertions.assertEquals("user-123", result.id());
 
         Mockito.verify(usersResource, Mockito.times(1)).create(Mockito.any(UserRepresentation.class));
         Mockito.verify(userResource, Mockito.times(1)).resetPassword(Mockito.any());
@@ -231,7 +245,7 @@ class KeyCloakServiceImplTest {
         Mockito.when(userResource.toRepresentation()).thenReturn(fakeUserRepresentation);
 
         // Act
-        keycloakService.updateUser(userId, updateDto, true);
+        keycloakService.updateUser(userId, updateDto);
 
         // Assert
         ArgumentCaptor<UserRepresentation> userCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
@@ -343,28 +357,4 @@ class KeyCloakServiceImplTest {
         mockServer.verify();
     }
 
-    @Test
-    void updateUser_CallerNotAdminModifyingRoles_ThrowsSecurityException() {
-        // Arrange
-        String userId = "user-123";
-        UserUpdateDto updateDto = new UserUpdateDto(
-                "email@example.com",
-                "oldPass",
-                "newPass123",
-                "John",
-                "Doe"
-        );
-
-        Mockito.when(keycloakAdmin.realm(realm)).thenReturn(realmResource);
-        Mockito.when(realmResource.users()).thenReturn(usersResource);
-        Mockito.when(usersResource.get(userId)).thenReturn(userResource);
-        Mockito.when(userResource.toRepresentation()).thenReturn(fakeUserRepresentation);
-
-        SecurityException exception = Assertions.assertThrows(
-                SecurityException.class,
-                () -> keycloakService.updateUser(userId, updateDto, false)
-        );
-
-        Assertions.assertEquals("У вас нет прав на изменение ролей", exception.getMessage());
-    }
 }

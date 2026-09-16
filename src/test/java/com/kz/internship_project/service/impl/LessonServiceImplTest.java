@@ -59,9 +59,8 @@ class LessonServiceImplTest {
     @Test
     void create_Success() {
         // Arrange
-        Mockito.when(chapterRepository.findById(createDto.chapterId())).thenReturn(Optional.of(fakeChapter));
-        Mockito.when(lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId())).thenReturn(Optional.empty());
-        Mockito.when(lessonRepository.save(Mockito.any(Lesson.class))).thenReturn(fakeLesson);
+        Mockito.when(chapterRepository.existsById(createDto.chapterId())).thenReturn(true);
+        Mockito.when(lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId())).thenReturn(Optional.of(fakeLesson));
 
         // Act
         LessonResponseDto result = lessonService.create(createDto);
@@ -73,9 +72,9 @@ class LessonServiceImplTest {
         Assertions.assertEquals(fakeLesson.getDescription(), result.description());
         Assertions.assertEquals(fakeLesson.getContent(), result.content());
 
-        Mockito.verify(chapterRepository, Mockito.times(1)).findById(createDto.chapterId());
+        Mockito.verify(chapterRepository, Mockito.times(1)).existsById(createDto.chapterId());
         Mockito.verify(lessonRepository, Mockito.times(1)).findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId());
-        Mockito.verify(lessonRepository, Mockito.times(1)).save(Mockito.any(Lesson.class));
+        Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any(Lesson.class));
     }
 
     @Test
@@ -163,7 +162,7 @@ class LessonServiceImplTest {
     @Test
     void create_ChapterNotFound_ThrowsEntityNotFoundException() {
         // Arrange
-        Mockito.when(chapterRepository.findById(createDto.chapterId())).thenReturn(Optional.empty());
+        Mockito.when(chapterRepository.existsById(createDto.chapterId())).thenReturn(false);
 
         // Act
         EntityNotFoundException exception = Assertions.assertThrows(
@@ -173,7 +172,7 @@ class LessonServiceImplTest {
 
         // Assert
         Assertions.assertEquals("Глава с id " + createDto.chapterId() + " не найдена", exception.getMessage());
-        Mockito.verify(chapterRepository, Mockito.times(1)).findById(createDto.chapterId());
+        Mockito.verify(chapterRepository, Mockito.times(1)).existsById(createDto.chapterId());
         Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any());
     }
 

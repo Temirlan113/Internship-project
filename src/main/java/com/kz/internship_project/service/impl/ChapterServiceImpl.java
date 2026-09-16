@@ -10,8 +10,12 @@ import com.kz.internship_project.repository.CourseRepository;
 import com.kz.internship_project.repository.LessonRepository;
 import com.kz.internship_project.service.ChapterService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.resilience.annotation.Retryable;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,27 +32,37 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterMapper chapterMapper;
     private final LessonRepository lessonRepository;
 
-    private Course getCourseOrThrow(Long courseId){
-        return courseRepository.findById(courseId).orElseThrow(()->new EntityNotFoundException("Курс с id " + courseId + " не найден"));
+    private Course getCourseOrThrow(Long courseId) {
+        return courseRepository.findById(courseId).orElseThrow(() -> new EntityNotFoundException("Курс с id " + courseId + " не найден"));
     }
 
-    private Chapter getChapterOrThrow(Long id){
-        return chapterRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Глава с id " + id + " не найдена"));
+    private Chapter getChapterOrThrow(Long id) {
+        return chapterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Глава с id " + id + " не найдена"));
     }
 
 
+    @Retryable(value = DataIntegrityViolationException.class,
+            maxRetries = 3,
+            delay = 100)
     @Override
     @Transactional
     public ChapterResponseDto create(ChapterCreateDto dto) {
         log.info("Создание новой главы");
         log.debug("Создание главы с данными: {}", dto);
 
-        Course course = getCourseOrThrow(dto.courseId());
-        Chapter chapter = chapterMapper.toEntity(dto);
-        Integer maxOrder = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(dto.courseId()).map(Chapter::getChapterOrder).orElse(0);
-        chapter.setChapterOrder(maxOrder + 1);
-        chapter.setCourse(course);
-        Chapter savedChapter = chapterRepository.save(chapter);
+        if (!courseRepository.existsById(dto.courseId())) {
+            throw new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден");
+        }
+
+        chapterRepository.insertNextChapter(
+                dto.name(),
+                dto.description(),
+                dto.courseId()
+        );
+
+        Chapter savedChapter = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(dto.courseId())
+                .orElseThrow(()-> new EntityNotFoundException("Ошибка при получении созданной главы"));
+
 
         ChapterResponseDto chapterResponseDto = chapterMapper.toDto(savedChapter);
 
@@ -96,7 +110,7 @@ public class ChapterServiceImpl implements ChapterService {
             throw new EntityNotFoundException("Глава с id " + id + " не найдена");
         }
 
-        if (lessonRepository.existsByChapterId(id)){
+        if (lessonRepository.existsByChapterId(id)) {
             throw new IllegalArgumentException("Главу нельзя удалить, пока в ней есть уроки!");
         }
 

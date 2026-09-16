@@ -5,6 +5,7 @@ public enum RoleUser {
 
     ROLE_USER,
     ROLE_TEACHER,
-    ROLE_ADMIN
+    ROLE_ADMIN,
+    ROLE_STUDENT
 }
 
