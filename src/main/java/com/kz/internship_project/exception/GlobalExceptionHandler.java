@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
-
-import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -30,53 +28,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    @ExceptionHandler({EntityNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleNotFoundException(Exception ex) {
-
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(EntityNotFoundException ex) {
         log.warn("Ресурс не найден: {}", ex.getMessage());
-
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
-
-        log.error("Внутренняя ошибка сервера: ", ex);
-
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-
         String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-
         log.warn("Ошибка валидации входящих данных: {}", errorMessage);
-
-
         return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
     @ExceptionHandler({IllegalArgumentException.class, PropertyReferenceException.class})
     public ResponseEntity<ErrorResponse> handleBadRequestException(Exception ex) {
-
         log.warn("Некорректный аргумент: {}", ex.getMessage());
-
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
-
 
     @ExceptionHandler({HttpClientErrorException.Unauthorized.class, BadCredentialsException.class})
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(Exception ex) {
         log.warn("Ошибка аутентификации: {}", ex.getMessage());
-
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler({HttpClientErrorException.Forbidden.class, AccessDeniedException.class, SecurityException.class})
-    public ResponseEntity<ErrorResponse> handleForbiddenException(HttpClientErrorException.Forbidden ex) {
+    public ResponseEntity<ErrorResponse> handleForbiddenException(Exception ex) {
         log.warn("У вас нет прав доступа: {}", ex.getMessage());
-
         return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
@@ -87,15 +66,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomFileStorageException.class)
-    public ResponseEntity<ErrorResponse> FileStorageException(CustomFileStorageException ex){
+    public ResponseEntity<ErrorResponse> handleFileStorageException(CustomFileStorageException ex) {
         log.warn("Ошибка файлового хранилища: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> AccessDeniedException(AccessDeniedException ex){
-        log.warn("У вас нет прав для этого действия, {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
-
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+        log.error("Внутренняя ошибка сервера: ", ex);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера");
     }
 }

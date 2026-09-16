@@ -1,6 +1,5 @@
 package com.kz.internship_project.repository;
 
-import com.kz.internship_project.entity.Chapter;
 import com.kz.internship_project.entity.Lesson;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,18 +25,17 @@ VALUES (
     :name,
     :description,
     :content,
-    :chapter_id,
+    :chapterId,
     (SELECT COALESCE(MAX(lesson_order), 0) + 1 FROM lessons WHERE chapter_id = :chapterId),
     NOW(),
     NOW()
     )
-RETURNING *
 """, nativeQuery = true)
     void insertNextLesson(
             @Param("name") String name,
             @Param("description") String description,
             @Param("content") String content,
-            @Param("courseId") Long chapterId
+            @Param("chapterId") Long chapterId
     );
 
 }

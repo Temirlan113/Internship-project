@@ -11,6 +11,8 @@ import com.kz.internship_project.service.LessonService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,9 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
+    @Retryable(value = DataIntegrityViolationException.class,
+            maxRetries = 3,
+            delay = 100)
     public LessonResponseDto create(LessonCreateDto dto) {
 
         if (!chapterRepository.existsById(dto.chapterId())) {

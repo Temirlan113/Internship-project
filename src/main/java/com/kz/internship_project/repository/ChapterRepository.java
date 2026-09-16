@@ -24,12 +24,11 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
         VALUES (
             :name,
             :description,
-            :course_id,
+            :courseId,
             (SELECT COALESCE(MAX(chapter_order), 0) + 1 FROM chapters WHERE course_id = :courseId),
             NOW(),
             NOW()
         )
-        RETURNING *
         """, nativeQuery = true)
     void insertNextChapter(
       @Param("name") String name,

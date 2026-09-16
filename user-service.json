@@ -85,6 +85,15 @@
         "attributes": {}
       },
       {
+        "id": "40fd2873-eeac-4bc9-bc14-eec7b8a8ba2d",
+        "name": "ROLE_STUDENT",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "d603fs39-a47f-47be-b8e2-52cce2171534",
+        "attributes": {}
+      },
+      {
         "id": "3367fe79-7319-4ae8-9410-2bdd5adb3a0c",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",

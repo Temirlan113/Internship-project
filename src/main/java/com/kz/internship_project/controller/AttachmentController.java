@@ -21,7 +21,6 @@ public class AttachmentController {
     private final AttachmentService attachmentService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<AttachmentResponseDto> upload(@RequestParam("file") MultipartFile file, @RequestParam("lessonId") Long lessonId){
         AttachmentResponseDto response = attachmentService.uploadAttachment(file, lessonId);
 
