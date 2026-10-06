@@ -12,6 +12,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Duration;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
@@ -28,7 +30,9 @@ public abstract class BaseIntegrationTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("internship-project-db")
             .withUsername("postgres")
-            .withPassword("satorugod1");
+            .withPassword("satorugod1")
+    .withStartupTimeout(Duration.ofMinutes(5))
+            .withStartupAttempts(3);
 
     // 2. Поднимаем MinIO в контейнере
     @Container

@@ -24,5 +24,11 @@ jobs:
       - name: Дать права на исполнение gradlew
         run: chmod +x gradlew
 
+      # Добавляем шаг предварительного pull образ(ов)
+      - name: Предварительно скачать Docker образ
+        run: |
+          docker pull postgres:16-alpine
+          docker pull quay.io/minio/minio
+
       - name: Запустить интеграционные тесты
         run: ./gradlew test
