@@ -9,6 +9,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -32,7 +33,8 @@ public abstract class BaseIntegrationTest {
             .withUsername("postgres")
             .withPassword("satorugod1")
     .withStartupTimeout(Duration.ofMinutes(5))
-            .withStartupAttempts(3);
+            .withStartupAttempts(3)
+            .waitingFor(Wait.forHttp("/minio/health/live").forStatusCode(200));
 
     // 2. Поднимаем MinIO в контейнере
     @Container
@@ -41,7 +43,8 @@ public abstract class BaseIntegrationTest {
             .withEnv("MINIO_ROOT_USER", "admin")
             .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
             .withCommand("server /data")
-            .withStartupTimeout(Duration.ofMinutes(5));
+            .withStartupTimeout(Duration.ofMinutes(5))
+            .waitingFor(Wait.forListeningPort());
 
     // Заменяем свойства application.properties динамическими значениями из запущенных контейнеров
     @DynamicPropertySource
