@@ -2,9 +2,9 @@ name: Integration Tests
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "fix/tests" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "fix/tests" ]
 
 jobs:
   build-and-test:
