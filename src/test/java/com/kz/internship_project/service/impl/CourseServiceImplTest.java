@@ -17,9 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -134,8 +132,9 @@ class CourseServiceImplTest {
 
         Mockito.when(courseRepository.findAll(Mockito.any(Pageable.class))).thenReturn(coursePage);
 
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
         // Act
-        Page<CourseResponseDto> result = courseService.getAll(0, 10, "id", "asc");
+        Page<CourseResponseDto> result = courseService.getAll(pageable);
 
         // Assert
         Assertions.assertNotNull(result);

@@ -28,12 +28,12 @@ public class LessonServiceImpl implements LessonService {
     private final ChapterRepository chapterRepository;
     private final LessonMapper lessonMapper;
 
-    private Chapter getChapterOrThrow(Long chapterId){
-        return chapterRepository.findById(chapterId).orElseThrow(()->new EntityNotFoundException("Глава с id " + chapterId + " не найдена"));
+    private Chapter getChapterOrThrow(Long chapterId) {
+        return chapterRepository.findById(chapterId).orElseThrow(() -> new EntityNotFoundException("Глава с id " + chapterId + " не найдена"));
     }
 
-    private Lesson getLessonOrThrow(Long id){
-        return lessonRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Урок с id " + id + " не найден"));
+    private Lesson getLessonOrThrow(Long id) {
+        return lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Урок с id " + id + " не найден"));
     }
 
     @Override
@@ -43,26 +43,26 @@ public class LessonServiceImpl implements LessonService {
             delay = 100)
     public LessonResponseDto create(LessonCreateDto dto) {
 
-        if (!chapterRepository.existsById(dto.chapterId())) {
-            throw new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена");
-        }
-
         log.info("Создание нового урока");
         log.debug("Создание урока с данными: {}", dto);
 
-        lessonRepository.insertNextLesson(
-                dto.name(),
-                dto.description(),
-                dto.content(),
-                dto.chapterId()
-        );
-        Lesson savedLesson = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(dto.chapterId())
-                .orElseThrow(()->new EntityNotFoundException("Ошибка при получении созданного урока"));
+        Chapter chapter = chapterRepository.findById(dto.chapterId())
+                .orElseThrow(() -> new EntityNotFoundException("Глава с id " + dto.chapterId() + " не найдена"));
 
+        int nextOrder = lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(chapter.getId())
+                .map(lesson -> lesson.getLessonOrder() + 1)
+                .orElse(1);
+
+        Lesson lesson = lessonMapper.toEntity(dto);
+        lesson.setChapter(chapter);
+        lesson.setLessonOrder(nextOrder);
+
+        Lesson savedLesson = lessonRepository.saveAndFlush(lesson);
         LessonResponseDto responseDto = lessonMapper.toDto(savedLesson);
-
         log.debug("Урок успешно сохранен: {}", responseDto);
+
         return responseDto;
+
     }
 
     @Override

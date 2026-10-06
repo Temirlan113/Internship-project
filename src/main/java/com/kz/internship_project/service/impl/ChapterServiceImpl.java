@@ -10,12 +10,10 @@ import com.kz.internship_project.repository.CourseRepository;
 import com.kz.internship_project.repository.LessonRepository;
 import com.kz.internship_project.service.ChapterService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.resilience.annotation.Retryable;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,24 +48,22 @@ public class ChapterServiceImpl implements ChapterService {
         log.info("Создание новой главы");
         log.debug("Создание главы с данными: {}", dto);
 
-        if (!courseRepository.existsById(dto.courseId())) {
-            throw new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден");
-        }
-
-        chapterRepository.insertNextChapter(
-                dto.name(),
-                dto.description(),
-                dto.courseId()
-        );
-
-        Chapter savedChapter = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(dto.courseId())
-                .orElseThrow(()-> new EntityNotFoundException("Ошибка при получении созданной главы"));
+        Course course = courseRepository.findById(dto.courseId())
+                .orElseThrow(() -> new EntityNotFoundException("Курс с id " + dto.courseId() + " не найден"));
 
 
-        ChapterResponseDto chapterResponseDto = chapterMapper.toDto(savedChapter);
+        int nextOrder = chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(course.getId())
+                .map(chapter -> chapter.getChapterOrder() + 1)
+                .orElse(1);
 
-        log.debug("Глава успешно сохранена: {}", chapterResponseDto);
-        return chapterResponseDto;
+        Chapter chapter = chapterMapper.toEntity(dto);
+        chapter.setCourse(course);
+        chapter.setChapterOrder(nextOrder);
+
+            Chapter savedChapter = chapterRepository.saveAndFlush(chapter);
+            ChapterResponseDto chapterResponseDto = chapterMapper.toDto(savedChapter);
+            log.debug("Глава успешно сохранена: {}", chapterResponseDto);
+            return chapterResponseDto;
     }
 
     @Override

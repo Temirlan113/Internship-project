@@ -70,24 +70,64 @@ class ChapterServiceImplTest {
 
     @Test
     void create_Success() {
-        //Arrange
+        // 1. Arrange
+        Long courseId = 1L;
 
-        Mockito.when(courseRepository.existsById(createDto.courseId())).thenReturn(true);
-        Mockito.when(chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(createDto.courseId())).thenReturn(Optional.of(fakeChapter));
-        //Act
-        ChapterResponseDto result = chapterService.create(createDto);
+        Course course = new Course();
+        course.setId(courseId);
 
-        //Assert
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(fakeChapter.getId(), result.id());
-        Assertions.assertEquals(fakeChapter.getName(), result.name());
-        Assertions.assertEquals(fakeChapter.getDescription(), result.description());
+        Chapter existingChapter = new Chapter();
+        existingChapter.setChapterOrder(1);
 
+        Chapter newChapterEntity = new Chapter();
+        newChapterEntity.setName("Основы Java");
 
-        Mockito.verify(courseRepository, Mockito.times(1)).existsById(createDto.courseId());
-        Mockito.verify(chapterRepository, Mockito.times(1)).insertNextChapter(createDto.name(), createDto.description(), createDto.courseId());
-        Mockito.verify(chapterRepository, Mockito.times(1)).findFirstByCourseIdOrderByChapterOrderDesc(createDto.courseId());
-        Mockito.verify(chapterRepository, Mockito.never()).save(Mockito.any(Chapter.class));
+        Chapter savedChapterEntity = new Chapter();
+        savedChapterEntity.setId(10L);
+        savedChapterEntity.setName("Основы Java");
+        savedChapterEntity.setCourse(course);
+        savedChapterEntity.setChapterOrder(2);
+
+        ChapterResponseDto expectedResponse = new ChapterResponseDto(
+                10L,
+                "Основы Java",
+                "Описание",
+                2,
+                1L,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        Mockito.when(courseRepository.findById(courseId))
+                .thenReturn(Optional.of(course));
+
+        Mockito.when(chapterRepository.findFirstByCourseIdOrderByChapterOrderDesc(courseId))
+                .thenReturn(Optional.of(existingChapter));
+
+        Mockito.when(chapterMapper.toEntity(createDto))
+                .thenReturn(newChapterEntity);
+
+        Mockito.when(chapterRepository.saveAndFlush(Mockito.any(Chapter.class)))
+                .thenReturn(savedChapterEntity);
+
+        Mockito.when(chapterMapper.toDto(savedChapterEntity))
+                .thenReturn(expectedResponse);
+
+        // 2. Act
+        ChapterResponseDto actualResponse = chapterService.create(createDto);
+
+        // 3. Assert
+        Assertions.assertNotNull(actualResponse);
+        Assertions.assertEquals(expectedResponse.id(), actualResponse.id());
+        Assertions.assertEquals(expectedResponse.name(), actualResponse.name());
+        Assertions.assertEquals(2, actualResponse.chapterOrder());
+        Assertions.assertEquals(expectedResponse.courseId(), actualResponse.courseId());
+
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(courseId);
+        Mockito.verify(chapterRepository, Mockito.times(1)).findFirstByCourseIdOrderByChapterOrderDesc(courseId);
+        Mockito.verify(chapterMapper, Mockito.times(1)).toEntity(createDto);
+        Mockito.verify(chapterRepository, Mockito.times(1)).saveAndFlush(Mockito.any(Chapter.class));
+        Mockito.verify(chapterMapper, Mockito.times(1)).toDto(savedChapterEntity);
     }
 
     @Test
@@ -174,16 +214,18 @@ class ChapterServiceImplTest {
     @Test
     void create_CourseNotFound_ThrowsEntityNotFoundException() {
         //Arrange
-
-        Mockito.when(courseRepository.existsById(fakeCourse.getId())).thenReturn(false);
+        Mockito.when(courseRepository.findById(fakeCourse.getId())).thenReturn(Optional.empty());
 
         //Act
         EntityNotFoundException exception = Assertions.assertThrows(EntityNotFoundException.class, () -> chapterService.create(createDto));
 
         //Assert
         Assertions.assertEquals("Курс с id " + createDto.courseId() + " не найден", exception.getMessage());
-        Mockito.verify(courseRepository, Mockito.times(1)).existsById(fakeCourse.getId());
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(fakeCourse.getId());
+        Mockito.verify(chapterRepository, Mockito.never()).saveAndFlush(Mockito.any());
 
+
+        Mockito.verifyNoInteractions(chapterRepository, chapterMapper);
     }
 
 

@@ -1,17 +1,16 @@
 package com.kz.internship_project.controller;
 
-import com.kz.internship_project.dto.attachment.AttachmentDownloadDto;
-import com.kz.internship_project.dto.attachment.AttachmentResponseDto;
+import com.kz.internship_project.dto.attachment.*;
 import com.kz.internship_project.service.AttachmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,12 +19,6 @@ public class AttachmentController {
 
     private final AttachmentService attachmentService;
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AttachmentResponseDto> upload(@RequestParam("file") MultipartFile file, @RequestParam("lessonId") Long lessonId){
-        AttachmentResponseDto response = attachmentService.uploadAttachment(file, lessonId);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
     @GetMapping(value = "/download/{attachmentId}")
     public ResponseEntity<InputStreamResource> download(@PathVariable Long attachmentId) {
@@ -33,14 +26,34 @@ public class AttachmentController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadDto.fileName() + "\"")
+                .headers(headers -> headers.setContentDisposition(
+                        ContentDisposition.attachment()
+                                .filename(downloadDto.fileName(), StandardCharsets.UTF_8)
+                                .build()))
                 .body(downloadDto.resource());
+
     }
+
     @DeleteMapping(value = "/{attachmentId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<Void> delete(@PathVariable Long attachmentId){
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
+    public ResponseEntity<Void> delete(@PathVariable Long attachmentId) {
         attachmentService.deleteAttachment(attachmentId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/presigned-upload-url")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_TEACHER')")
+    public ResponseEntity<PresignedUrlResponseDto> getUploadUrl(@Valid @RequestBody UploadRequestDto request) {
+        PresignedUrlResponseDto response = attachmentService.getPresignedUploadUrl(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/confirm")
+    @Operation(summary = "Подтверждение загрузки файла и сохранение в БД")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_TEACHER')")
+    public ResponseEntity<AttachmentResponseDto> confirmUpload(@Valid @RequestBody AttachmentConfirmDto dto) {
+        AttachmentResponseDto response = attachmentService.confirmUpload(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

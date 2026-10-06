@@ -3,6 +3,7 @@ package com.kz.internship_project.service;
 import com.kz.internship_project.dto.course.CourseCreateDto;
 import com.kz.internship_project.dto.course.CourseResponseDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CourseService {
 
@@ -14,5 +15,5 @@ public interface CourseService {
 
     void delete(Long id);
 
-    Page<CourseResponseDto> getAll(int page, int size, String sortBy, String sortDir);
+    Page<CourseResponseDto> getAll(Pageable pageable);
 }

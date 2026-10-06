@@ -11,4 +11,8 @@ public interface FileService {
     InputStreamResource downloadFile(String objectKey);
 
     void deleteFile(String objectKey);
+
+    String generatePresignedUploadUrl(String fileKey);
+
+    boolean exists(String objectKey);
 }

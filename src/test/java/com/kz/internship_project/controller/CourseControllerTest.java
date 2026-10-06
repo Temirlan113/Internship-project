@@ -11,13 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -124,10 +125,11 @@ class CourseControllerTest {
     @Test
     void getAll_Success_Returns200() throws Exception {
         // Arrange
+        Pageable pageable = PageRequest.of(0,10, Sort.by("id").ascending());
         CourseResponseDto course2 = new CourseResponseDto(2L, "Spring Core", "Все про Spring", LocalDateTime.now(), LocalDateTime.now());
         Page<CourseResponseDto> pageResponse = new PageImpl<>(List.of(validResponseDto, course2));
 
-        Mockito.when(courseService.getAll(0, 10, "id", "asc")).thenReturn(pageResponse);
+        Mockito.when(courseService.getAll(pageable)).thenReturn(pageResponse);
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/courses")
@@ -141,7 +143,7 @@ class CourseControllerTest {
                 .andExpect(jsonPath("$.content[1].id").value(course2.id()))
                 .andExpect(jsonPath("$.content[1].name").value(course2.name()));
 
-        Mockito.verify(courseService, Mockito.times(1)).getAll(0, 10, "id", "asc");
+        Mockito.verify(courseService, Mockito.times(1)).getAll(pageable);
     }
 
     //----------------------------------

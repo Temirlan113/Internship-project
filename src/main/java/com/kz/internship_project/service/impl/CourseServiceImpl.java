@@ -88,16 +88,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<CourseResponseDto> getAll(int page, int size, String sortBy, String sortDir) {
+    public Page<CourseResponseDto> getAll(Pageable pageable) {
 
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.DESC.name())
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Course> courses = courseRepository.findAll(pageable);
-
-        return courses.map(courseMapper::toDto);
+        return courseRepository.findAll(pageable)
+                .map(courseMapper::toDto);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.kz.internship_project.service.impl;
 
+import com.kz.internship_project.config.KeycloakConstants;
 import com.kz.internship_project.dto.auth.AuthResponseDto;
 import com.kz.internship_project.dto.auth.JwtResponseDto;
 import com.kz.internship_project.dto.auth.LoginCreateDto;
@@ -129,11 +130,11 @@ public class KeyCloakServiceImpl implements KeycloakService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", "password");
-        map.add("client_id", clientId);
-        map.add("client_secret", clientSecret);
-        map.add("username", login.username());
-        map.add("password", login.password());
+        map.add(KeycloakConstants.GRANT_TYPE, KeycloakConstants.GRANT_TYPE_PASSWORD);
+        map.add(KeycloakConstants.CLIENT_ID, clientId);
+        map.add(KeycloakConstants.CLIENT_SECRET, clientSecret);
+        map.add(KeycloakConstants.USERNAME, login.username());
+        map.add(KeycloakConstants.PASSWORD, login.password());
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
@@ -151,10 +152,10 @@ public class KeyCloakServiceImpl implements KeycloakService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", "refresh_token");
-        map.add("client_id", clientId);
-        map.add("client_secret", clientSecret);
-        map.add("refresh_token", request.refreshToken());
+        map.add(KeycloakConstants.GRANT_TYPE, KeycloakConstants.REFRESH_TOKEN);
+        map.add(KeycloakConstants.CLIENT_ID, clientId);
+        map.add(KeycloakConstants.CLIENT_SECRET, clientSecret);
+        map.add(KeycloakConstants.REFRESH_TOKEN, request.refreshToken());
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 

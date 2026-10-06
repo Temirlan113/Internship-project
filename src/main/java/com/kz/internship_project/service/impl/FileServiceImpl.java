@@ -3,10 +3,7 @@ package com.kz.internship_project.service.impl;
 import com.kz.internship_project.exception.CustomFileNotFoundException;
 import com.kz.internship_project.exception.CustomFileStorageException;
 import com.kz.internship_project.service.FileService;
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
+import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -15,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +70,36 @@ public class FileServiceImpl implements FileService {
             );
         } catch (Exception exception){
             throw new CustomFileStorageException("Не удалось удалить файл из MinIO: " + objectKey, exception);
+        }
+    }
+
+    public String generatePresignedUploadUrl(String fileKey) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Http.Method.PUT)
+                            .bucket(bucket)
+                            .object(fileKey)
+                            .expiry(15, TimeUnit.MINUTES)
+                            .build()
+            );
+        } catch (Exception e){
+            throw new CustomFileStorageException("Ошибка при генерации ссылки MinIO: " + fileKey, e);
+        }
+    }
+
+    @Override
+    public boolean exists(String objectKey) {
+        try {
+            minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .build()
+            );
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

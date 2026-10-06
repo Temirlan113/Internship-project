@@ -10,7 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,10 +70,8 @@ public class CourseController {
     @Operation(summary = "Получить список всех курсов", description = "Возвращает список курсов")
     @ApiResponse(responseCode = "200")
 
-    public Page<CourseResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "10") int size,
-                                          @RequestParam(defaultValue = "id") String sortBy,
-                                          @RequestParam(defaultValue = "asc") String sortDir){
-        return courseService.getAll(page, size, sortBy, sortDir);
+    public ResponseEntity<Page<CourseResponseDto>> getAll(@ParameterObject @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+        return ResponseEntity.ok(courseService.getAll(pageable));
+
     }
 }

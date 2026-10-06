@@ -25,6 +25,11 @@ dependencies {
 	implementation 'org.springframework.retry:spring-retry:2.0.13'
 
 	implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:postgresql:1.20.4'
+
+	testImplementation 'org.testcontainers:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'

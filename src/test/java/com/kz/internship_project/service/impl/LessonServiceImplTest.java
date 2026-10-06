@@ -58,23 +58,49 @@ class LessonServiceImplTest {
 
     @Test
     void create_Success() {
-        // Arrange
-        Mockito.when(chapterRepository.existsById(createDto.chapterId())).thenReturn(true);
-        Mockito.when(lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId())).thenReturn(Optional.of(fakeLesson));
+        // 1. Arrange
+        Long chapterId = 1L;
+        fakeChapter.setId(chapterId);
 
-        // Act
+        Lesson existingLesson = new Lesson();
+        existingLesson.setLessonOrder(1);
+
+        Lesson newLessonEntity = new Lesson();
+
+
+        Lesson savedLessonEntity = new Lesson();
+        savedLessonEntity.setId(10L);
+        savedLessonEntity.setName("Строки");
+        savedLessonEntity.setDescription("Урок про строки");
+        savedLessonEntity.setContent("Текст урока...");
+        savedLessonEntity.setLessonOrder(2);
+
+        LessonResponseDto expectedLesson = new LessonResponseDto(
+                10L, "Строки", "Урок про строки", "Текст урока...", 2, chapterId, LocalDateTime.now(), LocalDateTime.now()
+        );
+
+        Mockito.when(chapterRepository.findById(createDto.chapterId())).thenReturn(Optional.of(fakeChapter));
+        Mockito.when(lessonRepository.findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId())).thenReturn(Optional.of(existingLesson));
+        Mockito.when(lessonMapper.toEntity(createDto)).thenReturn(newLessonEntity);
+
+        Mockito.when(lessonRepository.saveAndFlush(Mockito.any(Lesson.class))).thenReturn(savedLessonEntity);
+        Mockito.when(lessonMapper.toDto(savedLessonEntity)).thenReturn(expectedLesson);
+
+        // 2. Act
         LessonResponseDto result = lessonService.create(createDto);
 
-        // Assert
+        // 3. Assert
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(fakeLesson.getId(), result.id());
-        Assertions.assertEquals(fakeLesson.getName(), result.name());
-        Assertions.assertEquals(fakeLesson.getDescription(), result.description());
-        Assertions.assertEquals(fakeLesson.getContent(), result.content());
+        Assertions.assertEquals(expectedLesson.id(), result.id());
+        Assertions.assertEquals(expectedLesson.name(), result.name());
+        Assertions.assertEquals(expectedLesson.description(), result.description());
+        Assertions.assertEquals(expectedLesson.content(), result.content());
+        Assertions.assertEquals(2, result.lessonOrder());
 
-        Mockito.verify(chapterRepository, Mockito.times(1)).existsById(createDto.chapterId());
+        Mockito.verify(chapterRepository, Mockito.times(1)).findById(createDto.chapterId());
         Mockito.verify(lessonRepository, Mockito.times(1)).findFirstByChapterIdOrderByLessonOrderDesc(createDto.chapterId());
-        Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any(Lesson.class));
+
+        Mockito.verify(lessonRepository, Mockito.times(1)).saveAndFlush(Mockito.any(Lesson.class));
     }
 
     @Test
@@ -162,7 +188,7 @@ class LessonServiceImplTest {
     @Test
     void create_ChapterNotFound_ThrowsEntityNotFoundException() {
         // Arrange
-        Mockito.when(chapterRepository.existsById(createDto.chapterId())).thenReturn(false);
+        Mockito.when(chapterRepository.findById(createDto.chapterId())).thenReturn(Optional.empty());
 
         // Act
         EntityNotFoundException exception = Assertions.assertThrows(
@@ -172,8 +198,12 @@ class LessonServiceImplTest {
 
         // Assert
         Assertions.assertEquals("Глава с id " + createDto.chapterId() + " не найдена", exception.getMessage());
-        Mockito.verify(chapterRepository, Mockito.times(1)).existsById(createDto.chapterId());
-        Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any());
+
+        Mockito.verify(chapterRepository, Mockito.times(1)).findById(createDto.chapterId());
+
+        Mockito.verify(lessonRepository, Mockito.never()).saveAndFlush(Mockito.any());
+
+        Mockito.verifyNoInteractions(lessonMapper);
     }
 
     @Test
