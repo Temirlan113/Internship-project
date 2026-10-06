@@ -28,7 +28,7 @@ jobs:
       - name: Предварительно скачать Docker образ
         run: |
           docker pull postgres:15-alpine
-          docker pull quay.io/minio/minio
+          docker pull minio/minio:latest
 
       - name: Запустить интеграционные тесты
         run: ./gradlew test

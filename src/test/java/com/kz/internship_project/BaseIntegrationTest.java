@@ -40,7 +40,8 @@ public abstract class BaseIntegrationTest {
             .withExposedPorts(9000)
             .withEnv("MINIO_ROOT_USER", "admin")
             .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
-            .withCommand("server /data");
+            .withCommand("server /data")
+            .withStartupTimeout(Duration.ofMinutes(5));
 
     // Заменяем свойства application.properties динамическими значениями из запущенных контейнеров
     @DynamicPropertySource
