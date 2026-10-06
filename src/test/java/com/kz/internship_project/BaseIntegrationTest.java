@@ -38,7 +38,7 @@ public abstract class BaseIntegrationTest {
 
     // 2. Поднимаем MinIO в контейнере
     @Container
-    static GenericContainer<?> minio = new GenericContainer<>("bitnami/minio:latest")
+    static GenericContainer<?> minio = new GenericContainer<>("minio/minio:latest")
             .withExposedPorts(9000)
             .withEnv("MINIO_ROOT_USER", "admin")
             .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
