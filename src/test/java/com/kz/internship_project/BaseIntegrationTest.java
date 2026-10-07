@@ -30,5 +30,9 @@ public abstract class BaseIntegrationTest {
         registry.add("minio.password", () -> "admin1234");
 
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
+
+        registry.add("keycloak.password", () -> "dummy-pass");
+        registry.add("keycloak.admin-user", () -> "admin");
+        registry.add("keycloak.client-secret", () -> "dummy-secret");
     }
 }
