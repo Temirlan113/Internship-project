@@ -39,7 +39,7 @@ public abstract class BaseIntegrationTest {
 
     // 2. Поднимаем MinIO в контейнере
     @Container
-    static MinIOContainer minio = new MinIOContainer("cgr.dev/chainguard/minio:latest")
+    static MinIOContainer minio = new MinIOContainer("pgsty/silo:latest")
             .withExposedPorts(9000)
             .withEnv("MINIO_ROOT_USER", "admin")
             .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
