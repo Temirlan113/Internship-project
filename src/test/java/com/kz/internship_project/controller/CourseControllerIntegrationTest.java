@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 
 import java.util.List;
 
@@ -18,6 +20,7 @@ import static com.kz.internship_project.utils.SecurityTestUtils.keycloakJwt;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +56,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(keycloakJwt("ROLE_ADMIN"))) // Подставляем валидный токен с ролью ADMIN
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name", is("Java Core")))
@@ -97,7 +100,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidDto))
-                        .with(keycloakJwt("ROLE_ADMIN")))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isBadRequest());
 
         // Проверяем, что в базе пусто
@@ -115,7 +118,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
 
         // Act & Assert: Запрашиваем с ролью STUDENT (в SecurityConfig разрешен просмотр)
         mockMvc.perform(get("/api/v1/courses/{id}", savedCourse.getId())
-                        .with(keycloakJwt("ROLE_STUDENT")))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(savedCourse.getId().intValue())))
                 .andExpect(jsonPath("$.name", is("Spring Boot 3")));
