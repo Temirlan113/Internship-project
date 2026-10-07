@@ -7,17 +7,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MinIOContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-
-import java.time.Duration;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
 public abstract class BaseIntegrationTest {
 
     @Autowired
@@ -26,24 +22,35 @@ public abstract class BaseIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
-    // 1. Поднимаем реальный PostgreSQL в контейнере
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"))
-            .withDatabaseName("internship-project-db")
-            .withUsername("postgres")
-            .withPassword("satorugod1")
-    .withStartupTimeout(Duration.ofMinutes(5))
-            .withStartupAttempts(3);
+    // 1. PostgreSQL с явным указанием совместимости
+    protected static final PostgreSQLContainer<?> postgres;
 
+    // 2. GenericContainer вместо MinIOContainer (чтобы исключить проверки модуля Testcontainers)
+    protected static final GenericContainer<?> minio;
 
-    // 2. Поднимаем MinIO в контейнере
-    @Container
-    static MinIOContainer minio = new MinIOContainer(DockerImageName.parse("quay.io/minio/minio:RELEASE.2024-11-07T00-52-19Z"))
-            .withUserName("admin")
-            .withPassword("admin1234");
+    static {
+        postgres = new PostgreSQLContainer<>(
+                DockerImageName.parse("postgres:15-alpine").asCompatibleSubstituteFor("postgres")
+        )
+                .withDatabaseName("internship-project-db")
+                .withUsername("postgres")
+                .withPassword("satorugod1");
 
+        minio = new GenericContainer<>(
+                DockerImageName.parse("minio/minio:latest")
+        )
+                .withEnv("MINIO_ROOT_USER", "admin")
+                .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
+                .withCommand("server /data")
+                .withExposedPorts(9000)
+                .waitingFor(Wait.forHttp("/minio/health/ready").forPort(9000));
 
-    // Заменяем свойства application.properties динамическими значениями из запущенных контейнеров
+        // Стартуем контейнеры вручную в static-блоке (Singleton Pattern)
+        // Это самый надежный способ для Spring Boot + Testcontainers
+        postgres.start();
+        minio.start();
+    }
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         // Postgres
@@ -52,11 +59,12 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
 
         // MinIO
-        registry.add("minio.url", minio::getS3URL);
-        registry.add("minio.user", minio::getUserName);
-        registry.add("minio.password", minio::getPassword);
+        String minioUrl = "http://" + minio.getHost() + ":" + minio.getMappedPort(9000);
+        registry.add("minio.url", () -> minioUrl);
+        registry.add("minio.user", () -> "admin");
+        registry.add("minio.password", () -> "admin1234");
 
-        // Отключаем обязательную валидацию issuer-uri Keycloak при старте контекста
+        // OAuth2 Stub
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
     }
 }
