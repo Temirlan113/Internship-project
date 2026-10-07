@@ -1,6 +1,8 @@
 package com.kz.internship_project;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kz.internship_project.service.KeycloakInitializer;
+import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -22,6 +24,12 @@ public abstract class BaseIntegrationTest {
 
     @MockitoBean
     protected JwtDecoder jwtDecoder;
+
+    @MockitoBean
+    private Keycloak keycloak;
+
+    @MockitoBean
+    private KeycloakInitializer keycloakInitializer;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
