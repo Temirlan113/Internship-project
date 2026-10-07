@@ -13,6 +13,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
@@ -34,18 +35,14 @@ public abstract class BaseIntegrationTest {
             .withUsername("postgres")
             .withPassword("satorugod1")
     .withStartupTimeout(Duration.ofMinutes(5))
-            .withStartupAttempts(3)
-            .waitingFor(Wait.forHttp("/minio/health/live").forStatusCode(200));
+            .withStartupAttempts(3);
 
     // 2. Поднимаем MinIO в контейнере
     @Container
-    static MinIOContainer minio = new MinIOContainer("pgsty/silo:latest")
-            .withExposedPorts(9000)
-            .withEnv("MINIO_ROOT_USER", "admin")
-            .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
-            .withCommand("server /data")
-            .withStartupTimeout(Duration.ofMinutes(5))
-            .waitingFor(Wait.forListeningPort());
+    static MinIOContainer minio = new MinIOContainer(DockerImageName.parse("minio/minio:RELEASE.2023-09-04T19-57-37Z"))
+            .withUserName("admin")
+            .withPassword("admin1234");
+
 
     // Заменяем свойства application.properties динамическими значениями из запущенных контейнеров
     @DynamicPropertySource
@@ -56,9 +53,9 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
 
         // MinIO
-        registry.add("minio.url", () -> "http://" + minio.getHost() + ":" + minio.getMappedPort(9000));
-        registry.add("minio.user", () -> "admin");
-        registry.add("minio.password", () -> "admin1234");
+        registry.add("minio.url", minio::getS3URL);
+        registry.add("minio.user", minio::getUserName);
+        registry.add("minio.password", minio::getPassword);
 
         // Отключаем обязательную валидацию issuer-uri Keycloak при старте контекста
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
