@@ -37,7 +37,7 @@ public abstract class BaseIntegrationTest {
                 .withPassword("satorugod1");
 
         minio = new GenericContainer<>(
-                DockerImageName.parse("minio/minio:latest")
+                DockerImageName.parse("minio/minio:RELEASE.2024-01-16T16-07-38Z".toLowerCase())
         )
                 .withEnv("MINIO_ROOT_USER", "admin")
                 .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
