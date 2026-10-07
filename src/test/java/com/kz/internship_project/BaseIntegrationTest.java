@@ -39,7 +39,7 @@ public abstract class BaseIntegrationTest {
 
     // 2. Поднимаем MinIO в контейнере
     @Container
-    static MinIOContainer minio = new MinIOContainer(DockerImageName.parse("minio/minio:RELEASE.2023-09-04T19-57-37Z"))
+    static MinIOContainer minio = new MinIOContainer(DockerImageName.parse("quay.io/minio/minio:RELEASE.2024-11-07T00-52-19Z"))
             .withUserName("admin")
             .withPassword("admin1234");
 
