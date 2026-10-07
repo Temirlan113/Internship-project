@@ -12,6 +12,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.Collections;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "keycloak.initializer.enabled", havingValue = "true", matchIfMissing = true)
 public class KeycloakInitializer {
 
     @Value("${keycloak.realm}")

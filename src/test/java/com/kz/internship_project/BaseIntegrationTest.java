@@ -25,11 +25,8 @@ public abstract class BaseIntegrationTest {
     @MockitoBean
     protected JwtDecoder jwtDecoder;
 
-    @MockitoBean
-    private Keycloak keycloak;
 
-    @MockitoBean
-    private KeycloakInitializer keycloakInitializer;
+
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -47,5 +44,6 @@ public abstract class BaseIntegrationTest {
         registry.add("keycloak.password", () -> "dummy-pass");
         registry.add("keycloak.admin-user", () -> "admin");
         registry.add("keycloak.client-secret", () -> "dummy-secret");
+        registry.add("keycloak.initializer.enabled", () -> "false");
     }
 }
