@@ -8,6 +8,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -38,7 +39,7 @@ public abstract class BaseIntegrationTest {
 
     // 2. Поднимаем MinIO в контейнере
     @Container
-    static GenericContainer<?> minio = new GenericContainer<>("minio/minio:RELEASE.2024-03-07T00-43-48Z")
+    static MinIOContainer minio = new MinIOContainer("cgr.dev/chainguard/minio:latest")
             .withExposedPorts(9000)
             .withEnv("MINIO_ROOT_USER", "admin")
             .withEnv("MINIO_ROOT_PASSWORD", "admin1234")
