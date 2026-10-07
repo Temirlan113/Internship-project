@@ -118,7 +118,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
 
         // Act & Assert: Запрашиваем с ролью STUDENT (в SecurityConfig разрешен просмотр)
         mockMvc.perform(get("/api/v1/courses/{id}", savedCourse.getId())
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(savedCourse.getId().intValue())))
                 .andExpect(jsonPath("$.name", is("Spring Boot 3")));
