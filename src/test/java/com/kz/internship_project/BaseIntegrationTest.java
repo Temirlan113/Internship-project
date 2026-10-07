@@ -35,6 +35,7 @@ public abstract class BaseIntegrationTest {
     .withStartupTimeout(Duration.ofMinutes(5))
             .withStartupAttempts(3);
 
+
     // 2. Поднимаем MinIO в контейнере
     @Container
     static MinIOContainer minio = new MinIOContainer(DockerImageName.parse("quay.io/minio/minio:RELEASE.2024-11-07T00-52-19Z"))
