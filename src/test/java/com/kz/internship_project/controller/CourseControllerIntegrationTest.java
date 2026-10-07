@@ -3,6 +3,7 @@ package com.kz.internship_project.controller;
 import com.kz.internship_project.BaseIntegrationTest;
 import com.kz.internship_project.dto.course.CourseCreateDto;
 import com.kz.internship_project.entity.Course;
+import com.kz.internship_project.repository.ChapterRepository;
 import com.kz.internship_project.repository.CourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,9 +27,13 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired
+    private ChapterRepository chapterRepository;
+
     @BeforeEach
     void setUp() {
         // Очищаем БД перед каждым тестом, чтобы обеспечить изоляцию
+        chapterRepository.deleteAll();
         courseRepository.deleteAll();
     }
 
