@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -18,6 +20,9 @@ public abstract class BaseIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @MockitoBean
+    protected JwtDecoder jwtDecoder;
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         // Подключаемся к сервисам, запущенным GitHub Actions
@@ -29,7 +34,7 @@ public abstract class BaseIntegrationTest {
         registry.add("minio.user", () -> "admin");
         registry.add("minio.password", () -> "admin1234");
 
-        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
+        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "http://localhost:8084/realms/user-service-realm");
 
         registry.add("keycloak.password", () -> "dummy-pass");
         registry.add("keycloak.admin-user", () -> "admin");
