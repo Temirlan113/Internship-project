@@ -37,6 +37,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         courseRepository.deleteAll();
     }
 
+
     @Test
     @DisplayName("Должен успешно создать курс, если пользователь — ROLE_ADMIN")
     void create_ShouldReturn201_WhenUserIsAdmin() throws Exception {
