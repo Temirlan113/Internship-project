@@ -5,6 +5,7 @@ import com.kz.internship_project.dto.course.CourseCreateDto;
 import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.repository.ChapterRepository;
 import com.kz.internship_project.repository.CourseRepository;
+import com.kz.internship_project.repository.LessonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,9 +31,13 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ChapterRepository chapterRepository;
 
+    @Autowired
+    private LessonRepository lessonRepository;
+
     @BeforeEach
     void setUp() {
         // Очищаем БД перед каждым тестом, чтобы обеспечить изоляцию
+        lessonRepository.deleteAll();
         chapterRepository.deleteAll();
         courseRepository.deleteAll();
     }
