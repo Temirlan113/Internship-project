@@ -40,11 +40,23 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
 
     private RequestPostProcessor jwtAdmin() {
         return jwt()
-                .authorities(new KeycloakRoleConverter()) // 🔑 Явно указываем твой конвертер!
+                .authorities(new KeycloakRoleConverter())
                 .jwt(jwt -> jwt
                         .subject("test-admin-id")
                         .claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_ADMIN.name()))));
     }
+
+    private RequestPostProcessor jwtStudent() {
+        return jwt()
+                .authorities(new KeycloakRoleConverter())
+                .jwt(jwt -> jwt
+                        .subject("test-admin-id")
+                        .claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_STUDENT.name()))));
+    }
+
+
+
+
 
 
     @BeforeEach
@@ -95,7 +107,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_USER"))))))
+                        .with(jwtAdmin()))
                 .andExpect(status().isForbidden());
 
         // Проверяем, что в БД ничего не сохранилось
@@ -112,7 +124,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_ADMIN"))))))
+                        .with(jwtAdmin()))
                 .andExpect(status().isBadRequest());
 
 
@@ -131,7 +143,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
 
         // Act & Assert: Запрашиваем с ролью STUDENT (в SecurityConfig разрешен просмотр)
         mockMvc.perform(get("/api/v1/courses/{id}", savedCourse.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_STUDENT"))))))
+                        .with(jwtStudent()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(savedCourse.getId().intValue())))
                 .andExpect(jsonPath("$.name", is("Spring Boot 3")));
@@ -153,7 +165,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/courses")
                         .param("page", "0")
                         .param("size", "2")
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_STUDENT"))))))
+                        .with(jwtStudent()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", Matchers.hasSize(2)))
                 .andExpect(jsonPath("$.totalElements", is(3)));
@@ -164,7 +176,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
     void getById_ShouldReturn404_WhenCourseDoesNotExist() throws Exception {
         //Act & Assert
         mockMvc.perform(get("/api/v1/courses/{id}", 999L)
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_STUDENT"))))))
+                        .with(jwtStudent()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", is(404)));
     }
@@ -182,7 +194,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/courses/{id}", savedCourse.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_ADMIN"))))))
+                        .with(jwtAdmin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("New name")))
                 .andExpect(jsonPath("$.description", is("New Description")));
@@ -203,7 +215,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/courses/{id}", 999L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto))
-                .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_ADMIN"))))))
+                        .with(jwtAdmin()))
                 .andExpect(status().isNotFound());
 
 
@@ -221,7 +233,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
 
         //Act & Assert
         mockMvc.perform(delete("/api/v1/courses/{id}", savedCourse.getId())
-                .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_STUDENT"))))))
+                        .with(jwtStudent()))
                 .andExpect(status().isForbidden());
 
         assertEquals(1, courseRepository.count());
@@ -239,7 +251,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(courseCreateDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_ADMIN"))))))
+                        .with(jwtAdmin()))
                 .andExpect(status().isBadRequest());
 
         assertEquals(0, courseRepository.count());
