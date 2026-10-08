@@ -2,6 +2,7 @@ package com.kz.internship_project.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,9 +25,11 @@ public class Course {
     private Long id;
 
     @Column(name = "name", nullable = false)
+    @Size(max = 255, message = "Название курса не должно превышать 255 символов")
     private String name;
 
     @Column(name = "description", nullable = false, length = 2550)
+    @Size(max = 2550, message = "Описание курса не должно превышать 2550 символов")
     private String description;
 
     @CreationTimestamp
