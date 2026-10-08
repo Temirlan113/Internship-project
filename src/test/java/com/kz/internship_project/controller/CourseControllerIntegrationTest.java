@@ -54,7 +54,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ROLE_ADMIN")))))).andExpect(status().isCreated())
+                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ADMIN")))))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name", is("Java Core")))
                 .andExpect(jsonPath("$.description", is("Основы языка Java")))
