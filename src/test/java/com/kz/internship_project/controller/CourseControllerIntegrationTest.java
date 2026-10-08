@@ -1,6 +1,7 @@
 package com.kz.internship_project.controller;
 
 import com.kz.internship_project.BaseIntegrationTest;
+import com.kz.internship_project.config.KeycloakRoleConverter;
 import com.kz.internship_project.dto.course.CourseCreateDto;
 import com.kz.internship_project.entity.Course;
 import com.kz.internship_project.enums.RoleUser;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,15 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private LessonRepository lessonRepository;
 
+    private RequestPostProcessor jwtAdmin() {
+        return jwt()
+                .authorities(new KeycloakRoleConverter()) // 🔑 Явно указываем твой конвертер!
+                .jwt(jwt -> jwt
+                        .subject("test-admin-id")
+                        .claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_ADMIN.name()))));
+    }
+
+
     @BeforeEach
     void setUp() {
         // Очищаем БД перед каждым тестом, чтобы обеспечить изоляцию
@@ -43,6 +54,8 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         chapterRepository.deleteAll();
         courseRepository.deleteAll();
     }
+
+
 
 
     @Test
@@ -55,7 +68,8 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_ADMIN.name())))))).andExpect(status().isCreated())
+                        .with(jwtAdmin()))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name", is("Java Core")))
                 .andExpect(jsonPath("$.description", is("Основы языка Java")))
