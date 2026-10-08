@@ -3,6 +3,7 @@ package com.kz.internship_project.controller;
 import com.kz.internship_project.BaseIntegrationTest;
 import com.kz.internship_project.dto.course.CourseCreateDto;
 import com.kz.internship_project.entity.Course;
+import com.kz.internship_project.enums.RoleUser;
 import com.kz.internship_project.repository.ChapterRepository;
 import com.kz.internship_project.repository.CourseRepository;
 import com.kz.internship_project.repository.LessonRepository;
@@ -54,7 +55,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of("ADMIN")))))).andExpect(status().isCreated())
+                        .with(jwt().jwt(jwt -> jwt.claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_ADMIN.name())))))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name", is("Java Core")))
                 .andExpect(jsonPath("$.description", is("Основы языка Java")))
