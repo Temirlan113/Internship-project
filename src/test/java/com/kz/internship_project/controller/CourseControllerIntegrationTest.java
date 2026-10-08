@@ -54,6 +54,14 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
                         .claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_STUDENT.name()))));
     }
 
+    private RequestPostProcessor jwtUser() {
+        return jwt()
+                .authorities(new KeycloakRoleConverter())
+                .jwt(jwt -> jwt
+                        .subject("test-admin-id")
+                        .claim("realm_access", Map.of("roles", List.of(RoleUser.ROLE_USER.name()))));
+    }
+
 
 
 
@@ -107,7 +115,7 @@ public class CourseControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .with(jwtAdmin()))
+                        .with(jwtUser()))
                 .andExpect(status().isForbidden());
 
         // Проверяем, что в БД ничего не сохранилось
