@@ -266,10 +266,12 @@ public class ChapterControllerIntegrationTest extends BaseIntegrationTest {
 
         //Arrange
         Course course = new Course(null, "Название", "Описание", null, null);
-        Chapter chapter = new Chapter(null, "Название", "Описание", 1, course, null, null);
-        ChapterCreateDto updateDto = new ChapterCreateDto("Название обновленное", "Описание обновленное", course.getId());
         courseRepository.save(course);
+
+        Chapter chapter = new Chapter(null, "Название", "Описание", 1, course, null, null);
         chapterRepository.save(chapter);
+
+        ChapterCreateDto updateDto = new ChapterCreateDto("Название обновленное", "Описание обновленное", course.getId());
 
         //Act & Assert
         mockMvc.perform(put("/api/v1/chapters/{id}", chapter.getId())
