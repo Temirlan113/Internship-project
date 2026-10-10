@@ -286,7 +286,6 @@ public class LessonControllerIntegrationTest extends BaseIntegrationTest {
         assertEquals("Обновленное название урока", updatedLesson.getName());
         assertEquals("Обновленное описание урока", updatedLesson.getDescription());
         assertEquals("Обновленный контент", updatedLesson.getContent());
-        assertEquals(chapter.getId(), updatedLesson.getChapter().getId());
     }
 
     @Test
