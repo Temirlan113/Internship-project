@@ -279,13 +279,14 @@ public class LessonControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.name", is(updateDto.name())))
                 .andExpect(jsonPath("$.description", is(updateDto.description())))
                 .andExpect(jsonPath("$.content", is(updateDto.content())))
-                .andExpect(jsonPath("$.chapterId", is(updateDto.chapterId())));
+                .andExpect(jsonPath("$.chapterId", is(updateDto.chapterId().intValue())));
 
         Lesson updatedLesson = lessonRepository.findById(lesson.getId()).orElseThrow();
 
         assertEquals("Обновленное название урока", updatedLesson.getName());
         assertEquals("Обновленное описание урока", updatedLesson.getDescription());
         assertEquals("Обновленный контент", updatedLesson.getContent());
+        assertEquals(chapter.getId(), updatedLesson.getChapter().getId());
     }
 
     @Test
