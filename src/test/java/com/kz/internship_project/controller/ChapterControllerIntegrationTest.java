@@ -162,8 +162,8 @@ public class ChapterControllerIntegrationTest extends BaseIntegrationTest {
 
         //Arrange
         Course course = new Course(null, "Название", "Описание", null, null);
-        Chapter chapter = new Chapter(null, "Название", "Описание", 1, course, null, null);
         courseRepository.save(course);
+        Chapter chapter = new Chapter(null, "Название", "Описание", 1, course, null, null);
         chapterRepository.save(chapter);
 
         //Act & Assert
