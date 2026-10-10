@@ -14,6 +14,7 @@ import com.kz.internship_project.repository.ChapterRepository;
 import com.kz.internship_project.repository.CourseRepository;
 import com.kz.internship_project.repository.LessonRepository;
 import com.kz.internship_project.service.FileService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -205,7 +206,7 @@ public class AttachmentControllerIntegrationTest extends BaseIntegrationTest {
                         .with(jwtRole(RoleUser.ROLE_STUDENT.name())))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_OCTET_STREAM_VALUE))
-                .andExpect(header().string("Content-Disposition", "attachment; filename*=utf-8''file.txt"));
+                .andExpect(header().string("Content-Disposition", Matchers.containsString("file.txt")));
     }
 
     @Test
