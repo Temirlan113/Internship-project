@@ -28,6 +28,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
     @PutMapping("/update-profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> updateMyProfile(
