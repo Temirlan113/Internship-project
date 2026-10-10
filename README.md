@@ -7,13 +7,19 @@ Backend-сервис для управления курсами, главами,
 
 ## 🛠 Технологический стек
 
-* **Java**: 17 / 21
-* **Framework**: Spring Boot 3.x (Spring Web, Spring Security, Spring Data JPA)
-* **Auth & IAM**: Keycloak (OAuth2 / Resource Server / JWT)
-* **Database**: PostgreSQL
-* **Documentation**: OpenAPI 3.0 / Swagger UI
-* **Containerization**: Docker, Docker Compose
-* **Tools**: Lombok, Maven / Gradle
+* **Core:** Java 17 / 21
+* **Framework:** Spring Boot 3.x (Spring Web, Spring Security, Spring Data JPA)
+* **Storage & Infrastructure:**
+    * PostgreSQL (Реляционная база данных)
+    * MinIO (Объектное хранилище для файлов с поддержкой Presigned URL)
+* **Auth & IAM:** Keycloak (OAuth2 / Resource Server / JWT, Admin Client)
+* **Testing & Quality Assurance:**
+    * **Unit Tests:** JUnit 5, Mockito (изолированное тестирование сервисов)
+    * **Integration Tests:** Spring Boot Test, MockMvc
+    * **Containerization Testing:** Testcontainers (автоматический запуск PostgreSQL, MinIO и Keycloak в изолированных Docker-контейнерах)
+* **Documentation:** OpenAPI 3.0 / Swagger UI
+* **Containerization & Ops:** Docker, Docker Compose, `.env` конфигурация
+* **Tools:** Lombok, Maven / Gradle
 
 ---
 

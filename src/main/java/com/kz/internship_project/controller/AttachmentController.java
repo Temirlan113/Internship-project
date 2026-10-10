@@ -43,7 +43,7 @@ public class AttachmentController {
     }
 
     @PostMapping("/presigned-upload-url")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_TEACHER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
     public ResponseEntity<PresignedUrlResponseDto> getUploadUrl(@Valid @RequestBody UploadRequestDto request) {
         PresignedUrlResponseDto response = attachmentService.getPresignedUploadUrl(request);
         return ResponseEntity.ok(response);
@@ -51,7 +51,7 @@ public class AttachmentController {
 
     @PostMapping("/confirm")
     @Operation(summary = "Подтверждение загрузки файла и сохранение в БД")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_TEACHER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'TEACHER')")
     public ResponseEntity<AttachmentResponseDto> confirmUpload(@Valid @RequestBody AttachmentConfirmDto dto) {
         AttachmentResponseDto response = attachmentService.confirmUpload(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

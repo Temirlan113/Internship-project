@@ -30,7 +30,6 @@ public abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        // Подключаемся к сервисам, запущенным GitHub Actions
         registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5432/internship-project-db");
         registry.add("spring.datasource.username", () -> "postgres");
         registry.add("spring.datasource.password", () -> "satorugod1");
