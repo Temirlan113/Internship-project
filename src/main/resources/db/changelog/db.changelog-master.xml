@@ -10,6 +10,7 @@
     <include file="db/changelog/changeset/003-create-table-lesson.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/changeset/004-create-table-attachments.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/changeset/005-add-unique-constraint-course-chapter-order.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changeset/006-add-unique-constraint-chapter-lesson-order.xml" relativeToChangelogFile="false"/>
 
 
 

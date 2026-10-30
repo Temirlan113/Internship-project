@@ -77,14 +77,10 @@ public class CourseServiceImpl implements CourseService {
     public void delete(Long id) {
         log.info("Удаление курса по id: {}", id);
 
-        if (!courseRepository.existsById(id)) {
-            throw new EntityNotFoundException("Курс с id " + id + " не найден");
-        }
+        Course course = courseRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Курс с " + id + " не найден"));
 
-        if (chapterRepository.existsByCourseId(id)) {
-            throw new IllegalArgumentException("Курс нельзя удалить, пока в нем есть главы!");
-        }
-        courseRepository.deleteById(id);
+        courseRepository.delete(course);
     }
 
     @Override
