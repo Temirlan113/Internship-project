@@ -42,10 +42,4 @@ public class Course {
     @Column(name = "updated_time", nullable = false)
     private LocalDateTime updatedTime;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Chapter> chapters = new ArrayList<>();
-
-
-
-
 }

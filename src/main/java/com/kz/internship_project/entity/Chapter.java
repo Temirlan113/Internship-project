@@ -45,6 +45,5 @@ public class Chapter {
     @Column(name = "updated_time", nullable = false)
     private LocalDateTime updatedTime;
 
-    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Lesson> lessons = new ArrayList<>();
+
 }
