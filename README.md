@@ -43,6 +43,7 @@ docker compose up --build -d
 
 ```
 
+
 > 🔐 **Админка Keycloak**: http://localhost:8084
 > **Логин**: `admin` | **Пароль**: `admin`
 
