@@ -191,6 +191,7 @@ public class UserControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+
     @Test
     @DisplayName("PUT /users/{userId}/role - Возвращает 400 Bad Request, если передана пустая роль")
     void changeUserRole_ShouldReturn400_WhenRoleIsNull() throws Exception {
