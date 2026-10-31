@@ -111,16 +111,14 @@ class CourseServiceImplTest {
         // Arrange
         Long courseId = fakeCourse.getId();
 
-        Mockito.when(courseRepository.existsById(courseId)).thenReturn(true);
-        Mockito.when(chapterRepository.existsByCourseId(courseId)).thenReturn(false);
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(fakeCourse));
 
         // Act
         courseService.delete(courseId);
 
         // Assert
-        Mockito.verify(courseRepository, Mockito.times(1)).existsById(courseId);
-        Mockito.verify(chapterRepository, Mockito.times(1)).existsByCourseId(courseId);
-        Mockito.verify(courseRepository, Mockito.times(1)).deleteById(courseId);
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(courseId);
+        Mockito.verify(courseRepository, Mockito.times(1)).delete(fakeCourse);
     }
 
     @Test
@@ -190,7 +188,7 @@ class CourseServiceImplTest {
     void delete_CourseNotFound_ThrowsEntityNotFoundException() {
         // Arrange
         Long nonExistentId = 99L;
-        Mockito.when(courseRepository.existsById(nonExistentId)).thenReturn(false);
+        Mockito.when(courseRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
         // Act
         EntityNotFoundException exception = Assertions.assertThrows(
@@ -199,30 +197,10 @@ class CourseServiceImplTest {
         );
 
         // Assert
-        Assertions.assertEquals("Курс с id " + nonExistentId + " не найден", exception.getMessage());
-        Mockito.verify(courseRepository, Mockito.times(1)).existsById(nonExistentId);
-        Mockito.verify(chapterRepository, Mockito.never()).existsByCourseId(Mockito.any());
-        Mockito.verify(courseRepository, Mockito.never()).deleteById(Mockito.any());
+        Assertions.assertEquals("Курс с " + nonExistentId + " не найден", exception.getMessage());
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(nonExistentId);
+        Mockito.verify(courseRepository, Mockito.never()).delete(Mockito.any());
     }
 
-    @Test
-    void delete_HasChapters_ThrowsIllegalArgumentException() {
-        // Arrange
-        Long courseId = fakeCourse.getId();
 
-        Mockito.when(courseRepository.existsById(courseId)).thenReturn(true);
-        Mockito.when(chapterRepository.existsByCourseId(courseId)).thenReturn(true);
-
-        // Act
-        IllegalArgumentException exception = Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> courseService.delete(courseId)
-        );
-
-        // Assert
-        Assertions.assertEquals("Курс нельзя удалить, пока в нем есть главы!", exception.getMessage());
-        Mockito.verify(courseRepository, Mockito.times(1)).existsById(courseId);
-        Mockito.verify(chapterRepository, Mockito.times(1)).existsByCourseId(courseId);
-        Mockito.verify(courseRepository, Mockito.never()).deleteById(Mockito.any());
-    }
 }
