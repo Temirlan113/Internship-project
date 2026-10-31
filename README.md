@@ -7,13 +7,19 @@ Backend-сервис для управления курсами, главами,
 
 ## 🛠 Технологический стек
 
-* **Java**: 17 / 21
-* **Framework**: Spring Boot 3.x (Spring Web, Spring Security, Spring Data JPA)
-* **Auth & IAM**: Keycloak (OAuth2 / Resource Server / JWT)
-* **Database**: PostgreSQL
-* **Documentation**: OpenAPI 3.0 / Swagger UI
-* **Containerization**: Docker, Docker Compose
-* **Tools**: Lombok, Maven / Gradle
+* **Core:** Java 17 / 21
+* **Framework:** Spring Boot 3.x (Spring Web, Spring Security, Spring Data JPA)
+* **Storage & Infrastructure:**
+    * PostgreSQL (Реляционная база данных)
+    * MinIO (Объектное хранилище для файлов с поддержкой Presigned URL)
+* **Auth & IAM:** Keycloak (OAuth2 / Resource Server / JWT, Admin Client)
+* **Testing & Quality Assurance:**
+    * **Unit Tests:** JUnit 5, Mockito (изолированное тестирование сервисов)
+    * **Integration Tests:** Spring Boot Test, MockMvc
+    * **Containerization Testing:** Testcontainers (автоматический запуск PostgreSQL, MinIO и Keycloak в изолированных Docker-контейнерах)
+* **Documentation:** OpenAPI 3.0 / Swagger UI
+* **Containerization & Ops:** Docker, Docker Compose, `.env` конфигурация
+* **Tools:** Lombok, Gradle
 
 ---
 
@@ -32,9 +38,11 @@ cd Internship-project
 Запустите приложение и всю необходимую инфраструктуру в Docker:
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
 
 ```
+
 
 > 🔐 **Админка Keycloak**: http://localhost:8084
 > **Логин**: `admin` | **Пароль**: `admin`
@@ -93,7 +101,8 @@ docker compose up --build -d
 
 ### 👤 Вложения
 
-* `POST /api/v1/attachments/upload` — Загрузка файла/вложения *(ADMIN, TEACHER)*
+- `POST /api/v1/attachments/presigned-upload-url` — Получение Presigned URL для загрузки файла в MinIO *(ADMIN, TEACHER)*
+- `POST /api/v1/attachments/confirm` — Подтверждение загрузки и сохранение информации о файле в БД *(ADMIN, TEACHER)*
 * `GET /api/v1/attachments/download/{attachmentId}` — Скачивание файла по ID*(ADMIN, TEACHER, STUDENT)*
 * `DELETE /api/v1/attachments/{attachmentId}` — Удаление вложения *(Только ADMIN)*
 
@@ -102,17 +111,17 @@ docker compose up --build -d
 
 ## 🛡 Матрица доступов
 
-| Эндпоинт / Действие                                        | Публично | USER | STUDENT | TEACHER | ADMIN |
-|------------------------------------------------------------|----------|------|---------|---------|-------|
-| Аутентификация (`/api/v1/auth/**`)                         | ✅        | ✅    | ✅       | ✅       | ✅     |
-| Обновление своего профиля (`PUT /users/update-profile`)    | ❌        | ✅    | ✅       | ✅       | ✅     |
-| Просмотр списка курсов (`GET /courses/**`)                 | ❌        | ✅    | ✅       | ✅       | ✅     |
-| Просмотр глав и уроков (`GET /chapters/**`, `/lessons/**`) | ❌        | ❌    | ✅       | ✅       | ✅     |
-| Скачивание вложений (`GET /attachments/download/**`)       | ❌        | ❌    | ✅       | ✅       | ✅     |
-| Загрузка вложений (`POST /attachments/upload`)             | ❌        | ❌    | ❌       | ✅       | ✅     |
-| Создание и ред. уроков (`POST/PUT /lessons/**`)            | ❌        | ❌    | ❌       | ❌       | ✅     |
-| Управление курсами и главами (`/courses`, `/chapters`)     | ❌        | ❌    | ❌       | ❌       | ✅     |
-| Управление пользователями и ролями (`/users/**`)           | ❌        | ❌    | ❌       | ❌       | ✅     |
+| Эндпоинт / Действие                                             | Публично | USER | STUDENT | TEACHER | ADMIN |
+|-----------------------------------------------------------------|----------|------|---------|---------|-------|
+| Аутентификация (`/api/v1/auth/**`)                              | ✅        | ✅    | ✅       | ✅       | ✅     |
+| Обновление своего профиля (`PUT /users/update-profile`)         | ❌        | ✅    | ✅       | ✅       | ✅     |
+| Просмотр списка курсов (`GET /courses/**`)                      | ❌        | ✅    | ✅       | ✅       | ✅     |
+| Просмотр глав и уроков (`GET /chapters/**`, `/lessons/**`)      | ❌        | ❌    | ✅       | ✅       | ✅     |
+| Скачивание вложений (`GET /attachments/download/**`)            | ❌        | ❌    | ✅       | ✅       | ✅     |
+| Загрузка вложений (/attachments/presigned-upload-url, /confirm) | ❌        | ❌    | ❌       | ✅       | ✅     |
+| Создание и ред. уроков (`POST/PUT /lessons/**`)                 | ❌        | ❌    | ❌       | ❌       | ✅     |
+| Управление курсами и главами (`/courses`, `/chapters`)          | ❌        | ❌    | ❌       | ❌       | ✅     |
+| Управление пользователями и ролями (`/users/**`)                | ❌        | ❌    | ❌       | ❌       | ✅     |
 
 ```
 

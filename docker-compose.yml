@@ -16,12 +16,23 @@ services:
     container_name: main-service-app
     ports:
       - "8083:8085"
+    env_file:
+      - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_URL: http://keycloak:8080
       MINIO_URL: http://localhost:9000
+
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASS: ${MINIO_ROOT_PASS}
     extra_hosts:
       - "localhost:host-gateway"
 
